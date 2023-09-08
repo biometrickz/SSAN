@@ -30,9 +30,10 @@ def main(args):
         train_set = data_bank.get_datasets(train=True, protocol=args.protocol, img_size=args.img_size, map_size=args.map_size, transform=transformer_train_ImageNet(), debug_subset_size=args.debug_subset_size)
     else:
         raise Exception
-    train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True, num_workers=8)
+    train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True, num_workers=4)
     max_iter = args.num_epochs*len(train_loader)
     # define model
+    print(args.model_type, max_iter)
     model = get_model(args.model_type, max_iter).cuda()
     # def optimizer
     optimizer = get_optimizer(

@@ -2,6 +2,7 @@ import os
 import torch
 import cv2
 from .Load_OULUNPU_train import Spoofing_train as Spoofing_train_oulu
+from .Load_Custom_train import Spoofing_train as Spoofing_train_custom
 from .Load_OULUNPU_valtest import Spoofing_valtest as Spoofing_valtest_oulu
 from .Load_CASIA_train import Spoofing_train as Spoofing_train_casia
 from .Load_CASIA_valtest import Spoofing_valtest as Spoofing_valtest_casia
@@ -18,6 +19,9 @@ class data_merge(object):
     def __init__(self, image_dir):
         self.dic = {}
         self.image_dir = image_dir
+        CUSTOM_Train = dataset_info()
+        CUSTOM_Train.root_dir = os.path.join(self.image_dir, "sample_dataset")
+        self.dic["Custom_Train"] = CUSTOM_Train
         CASIA_MFSD_info = dataset_info()
         CASIA_MFSD_info.root_dir = os.path.join(self.image_dir, "img_CASIA_FASD")
         self.dic["CASIA_MFSD"] = CASIA_MFSD_info
@@ -37,7 +41,9 @@ class data_merge(object):
     def get_single_dataset(self, data_name="", train=True, img_size=256, map_size=32, transform=None, debug_subset_size=None, UUID=-1):
         if train:
             data_dir = self.dic[data_name].root_dir
-            if data_name in ["OULU"]:
+            if data_name in ["Custom_Train"]:
+                data_set = Spoofing_train_custom(os.path.join(data_dir, "train_list.csv"), os.path.join(data_dir, "Train_files"), transform=transform, img_size=img_size, map_size=map_size, UUID=UUID)
+            elif data_name in ["OULU"]:
                 data_set = Spoofing_train_oulu(os.path.join(data_dir, "train_list_video.txt"), os.path.join(data_dir, "Train_files"), transform=transform, img_size=img_size, map_size=map_size, UUID=UUID)
             elif data_name in ["CASIA_MFSD", "Replay_attack", "MSU_MFSD"]:
                 data_set = Spoofing_train_casia(os.path.join(data_dir, "train_list_video.txt"), data_dir, transform=transform, img_size=img_size, map_size=map_size, UUID=UUID)
@@ -54,8 +60,11 @@ class data_merge(object):
         print("Loading {}, number: {}".format(data_name, len(data_set)))
         return data_set
 
-    def get_datasets(self, train=True, protocol="1", img_size=256, map_size=32, transform=None, debug_subset_size=None):
-        if protocol == "O_C_I_to_M":
+    def get_datasets(self, train=True, protocol="Custom", img_size=256, map_size=32, transform=None, debug_subset_size=None):
+        if protocol == "Custom":
+            data_name_list_train = ["Custom_Train"]
+            data_name_list_test = ["Custom_Test"]
+        elif protocol == "O_C_I_to_M":
             data_name_list_train = ["OULU", "CASIA_MFSD", "Replay_attack"]
             data_name_list_test = ["MSU_MFSD"]
         elif protocol == "O_M_I_to_C":
