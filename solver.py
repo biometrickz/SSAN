@@ -33,7 +33,6 @@ def main(args):
     train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True, num_workers=4)
     max_iter = args.num_epochs*len(train_loader)
     # define model
-    print(args.model_type, max_iter)
     model = get_model(args.model_type, max_iter).cuda()
     # def optimizer
     optimizer = get_optimizer(

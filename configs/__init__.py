@@ -6,7 +6,7 @@ import torch
 def parse_args():
     parser = argparse.ArgumentParser()
     # build dirs
-    parser.add_argument('--data_dir', type=str, default="/Users/macbookpro/Desktop/YeldarWork/datasets/", help='YOUR_Data_Dir')
+    parser.add_argument('--data_dir', type=str, default="/home/yeldar/Documents/Liveness/datasets/", help='YOUR_Data_Dir')
     parser.add_argument('--result_path', type=str, default='./results', help='root result directory')
     parser.add_argument('--result_name', type=str, default='demo', help='result directory')
     # training settings

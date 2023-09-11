@@ -39,7 +39,7 @@ def crop_face_from_scene(image,face_name_full, scale):
 class Spoofing_train(Dataset):
     
     def __init__(self, info_list, root_dir,  transform=None, scale_up=1.5, scale_down=1.0, img_size=256, map_size=32, UUID=-1):
-        self.landmarks_frame = pd.read_csv(info_list, delimiter=",", header=None)
+        self.landmarks_frame = pd.read_csv(info_list, delimiter=",", header=None).drop([0], axis=1)
         self.root_dir = root_dir
         self.map_root_dir = os.path.join(root_dir, "depth")
         self.transform = transform
@@ -56,6 +56,7 @@ class Spoofing_train(Dataset):
         video_name = str(self.landmarks_frame.iloc[idx, 1])
         image_dir = os.path.join(self.root_dir, video_name)
         spoofing_label = self.landmarks_frame.iloc[idx, 0]
+        print(video_name, image_dir, spoofing_label)
         if spoofing_label == 1:
             spoofing_label = 1
         else:
