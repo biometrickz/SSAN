@@ -52,7 +52,6 @@ def main(args):
     csv_root_path = os.path.join(args.result_path, args.result_name, "csv")
     check_folder(csv_root_path)
 
-
     # define loss
     binary_fuc = nn.CrossEntropyLoss()
     map_fuc = nn.MSELoss()

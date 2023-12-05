@@ -11,12 +11,29 @@ import os
 from utils import *
 from glob import glob
 
+from PIL import Image
+import matplotlib.pyplot as plt 
+from scrfd.scrfd import SCRFD 
+import warnings 
+import math 
 
-def crop_face_from_scene(image,face_name_full, scale):
-    f=open(face_name_full,'r')
-    lines=f.readlines()
-    y1,x1,w,h=[float(ele) for ele in lines[:4]]
-    f.close()
+warnings.filterwarnings('ignore')
+
+
+def get_bbox_face_detection(image, face_detector):
+    
+    bboxes, kpss = face_detector.detect(image, input_size=(640, 640))
+    bboxes_b = bboxes[:, 0:4]
+    bboxes_b = bboxes_b.astype('int32')
+    #  postprocess bounding boxes
+    x, y, w, h = [[box[0], box[1], box[2] - box[0], box[3] - box[1]]  for box in bboxes_b][0]
+    # face = image[y:y+h, x:x+w]
+    return x, y, w, h
+
+def crop_face_from_scene(image, bbox, scale):
+
+    #  postprocess bounding boxes
+    x1, y1, w, h = bbox
     y2=y1+w
     x2=x1+h
     y_mid=(y1+y2)/2.0
@@ -33,13 +50,14 @@ def crop_face_from_scene(image,face_name_full, scale):
     y2=min(math.floor(y2),w_img)
     x2=min(math.floor(x2),h_img)
     region=image[x1:x2,y1:y2]
+    
     return region
 
 
 class Spoofing_train(Dataset):
     
     def __init__(self, info_list, root_dir,  transform=None, scale_up=1.5, scale_down=1.0, img_size=256, map_size=32, UUID=-1):
-        self.landmarks_frame = pd.read_csv(info_list, delimiter=",", header=None).drop([0], axis=1)
+        self.labels = pd.read_csv(info_list, delimiter=",", header=None).drop([0], axis=1)
         self.root_dir = root_dir
         self.map_root_dir = os.path.join(root_dir, "depth")
         self.transform = transform
@@ -49,57 +67,44 @@ class Spoofing_train(Dataset):
         self.map_size = map_size
         self.UUID = UUID
 
+        self.face_detector = SCRFD(model_file='./scrfd/scrfd_500m_bnkps.onnx')
+        self.face_detector.prepare(1)
+        print("====== SCRFD-500m onnx Face Detector loaded. ======")
+
     def __len__(self):
-        return len(self.landmarks_frame)
+        return len(self.labels)
     
     def __getitem__(self, idx):
-        video_name = str(self.landmarks_frame.iloc[idx, 1])
-        image_dir = os.path.join(self.root_dir, video_name)
-        spoofing_label = self.landmarks_frame.iloc[idx, 0]
-        print(video_name, image_dir, spoofing_label)
+        image_name = str(self.labels.iloc[idx, 1])
+        image_path = os.path.join(self.root_dir, image_name)
+        spoofing_label = self.labels.iloc[idx, 0]
         if spoofing_label == 1:
             spoofing_label = 1
         else:
             spoofing_label = 0
-        image_x, map_x = self.get_single_image_x(image_dir, video_name, spoofing_label)
+        image_x, map_x = self.get_single_image_x(image_path, image_name, spoofing_label)
         sample = {'image_x': image_x, 'map_x': map_x, 'label': spoofing_label, "UUID": self.UUID}
         if self.transform:
             sample = self.transform(sample)
         return sample
-
-    def get_single_image_x(self, image_dir, video_name, spoofing_label):
-        frames_total = len(glob(os.path.join(image_dir, "*.jpg")))
-        map_dir = os.path.join(self.map_root_dir, video_name)
-        # random choose 1 frame
-        image_hair = video_name.split("/")[-1]
-        for temp in range(500):
-            image_id = np.random.randint(0, frames_total-1)
-            image_name = "{}_{}.jpg".format(image_hair, image_id)
-            image_path = os.path.join(image_dir, image_name)
-            bbx_path = image_path.replace("jpg", "dat")
-            if spoofing_label==1:
-                map_name = "{}_{}_depth.jpg".format(image_hair, image_id)
-                map_path = os.path.join(map_dir, map_name)
-                if os.path.exists(image_path) and os.path.exists(bbx_path) and os.path.exists(map_path):
-                    image_x_temp = cv2.imread(image_path)
-                    map_x_temp = cv2.imread(map_path, 0)
-                    if os.path.exists(image_path) and (image_x_temp is not None) and (map_x_temp is not None):
-                        break
-            else:
-                if os.path.exists(image_path) and os.path.exists(bbx_path):
-                    image_x_temp = cv2.imread(image_path)
-                    if os.path.exists(image_path) and (image_x_temp is not None):
-                        break
+    
+    def get_single_image_x(self, image_path, image_name, spoofing_label):
+        
         face_scale = np.random.randint(int(self.scale_down*10), int(self.scale_up*10))
         face_scale = face_scale/10.0
+        image_x_temp = cv2.imread(image_path)
+        x, y, w, h = get_bbox_face_detection(image_x_temp, self.face_detector)
+        image_x = cv2.resize(crop_face_from_scene(image_x_temp, [y, x, w, h], face_scale), (self.img_size, self.img_size))
+        
         if spoofing_label == 1:
-            map_x = cv2.resize(crop_face_from_scene(map_x_temp, bbx_path, face_scale), (self.map_size, self.map_size))
+            map_name = "{}_depth.jpeg".format(image_name.split('.')[0])
+            map_path = os.path.join(self.map_root_dir, map_name)
+            map_x_temp = cv2.imread(map_path, 0)
+            try:
+                map_x = cv2.resize(crop_face_from_scene(map_x_temp, [y, x, w, h], face_scale), (self.map_size, self.map_size))
+            except:
+                print(map_name)
         else:
             map_x = np.zeros((self.map_size, self.map_size))
-        # RGB
-        try:
-            image_x_temp = cv2.imread(image_path)
-            image_x = cv2.resize(crop_face_from_scene(image_x_temp, bbx_path, face_scale), (self.img_size, self.img_size))
-        except:
-            print(image_path)
+
         return image_x, map_x
