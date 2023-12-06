@@ -54,7 +54,7 @@ def crop_face_from_scene(image, bbox, scale):
     return region
 
 
-class Spoofing_train(Dataset):
+class Spoofing_custom(Dataset):
     
     def __init__(self, info_list, root_dir,  transform=None, scale_up=1.5, scale_down=1.0, img_size=256, map_size=32, UUID=-1):
         self.labels = pd.read_csv(info_list, delimiter=",", header=None).drop([0], axis=1)

@@ -2,8 +2,8 @@ import os
 import torch
 import cv2
 from .Load_OULUNPU_train import Spoofing_train as Spoofing_train_oulu
-from .Load_Custom import Spoofing_custom as Spoofing_train_custom
-# from .Load_Custom_test import Spoofing_test as Spoofing_test_custom
+from .Load_Custom_train import Spoofing_train as Spoofing_train_custom
+from .Load_Custom_test import Spoofing_test as Spoofing_test_custom
 from .Load_OULUNPU_valtest import Spoofing_valtest as Spoofing_valtest_oulu
 from .Load_CASIA_train import Spoofing_train as Spoofing_train_casia
 from .Load_CASIA_valtest import Spoofing_valtest as Spoofing_valtest_casia
@@ -43,7 +43,7 @@ class data_merge(object):
         if train:
             data_dir = self.dic[data_name].root_dir
             if data_name in ["Custom_Train"]:
-                data_set = Spoofing_custom(os.path.join(data_dir, "train_list.csv"), os.path.join(data_dir, "Train_files"), transform=transform, img_size=img_size, map_size=map_size, UUID=UUID)
+                data_set = Spoofing_train_custom(os.path.join(data_dir, "train_list.csv"), os.path.join(data_dir, "Train_files"), transform=transform, img_size=img_size, map_size=map_size, UUID=UUID)
             elif data_name in ["OULU"]:
                 data_set = Spoofing_train_oulu(os.path.join(data_dir, "train_list_video.txt"), os.path.join(data_dir, "Train_files"), transform=transform, img_size=img_size, map_size=map_size, UUID=UUID)
             elif data_name in ["CASIA_MFSD", "Replay_attack", "MSU_MFSD"]:
@@ -53,7 +53,7 @@ class data_merge(object):
         else:
             data_dir = self.dic[data_name].root_dir
             if data_name in ["Custom_Test"]:
-                data_set = Spoofing_custom(os.path.join(data_dir, "test_list.csv"), os.path.join(data_dir, "Test_files"), transform=transform, img_size=img_size, map_size=map_size, UUID=UUID)
+                data_set = Spoofing_test_custom(os.path.join(data_dir, "test_list.csv"), os.path.join(data_dir, "Test_files"), transform=transform, img_size=img_size, map_size=map_size, UUID=UUID)
             if data_name in ["OULU"]:
                 data_set = Spoofing_valtest_oulu(os.path.join(data_dir, "test_list_video.txt"), os.path.join(data_dir, "Test_files"), transform=transform, img_size=img_size, map_size=map_size, UUID=UUID)
             elif data_name in ["CASIA_MFSD", "Replay_attack", "MSU_MFSD"]:
