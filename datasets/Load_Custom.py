@@ -10,25 +10,8 @@ import math
 import os 
 from utils import *
 from glob import glob
+import pickle
 
-from PIL import Image
-import matplotlib.pyplot as plt 
-from scrfd.scrfd import SCRFD 
-import warnings 
-import math 
-
-warnings.filterwarnings('ignore')
-
-
-def get_bbox_face_detection(image, face_detector):
-    
-    bboxes, kpss = face_detector.detect(image, input_size=(640, 640))
-    bboxes_b = bboxes[:, 0:4]
-    bboxes_b = bboxes_b.astype('int32')
-    #  postprocess bounding boxes
-    x, y, w, h = [[box[0], box[1], box[2] - box[0], box[3] - box[1]]  for box in bboxes_b][0]
-    # face = image[y:y+h, x:x+w]
-    return x, y, w, h
 
 def crop_face_from_scene(image, bbox, scale):
 
@@ -67,10 +50,6 @@ class Spoofing_custom(Dataset):
         self.map_size = map_size
         self.UUID = UUID
 
-        self.face_detector = SCRFD(model_file='./scrfd/scrfd_500m_bnkps.onnx')
-        self.face_detector.prepare(1)
-        print("====== SCRFD-500m onnx Face Detector loaded. ======")
-
     def __len__(self):
         return len(self.labels)
     
@@ -93,7 +72,14 @@ class Spoofing_custom(Dataset):
         face_scale = np.random.randint(int(self.scale_down*10), int(self.scale_up*10))
         face_scale = face_scale/10.0
         image_x_temp = cv2.imread(image_path)
-        x, y, w, h = get_bbox_face_detection(image_x_temp, self.face_detector)
+
+        
+        f_path = os.path.join(self.root_dir, "bboxes.pickle")
+        with open(f_path, 'rb') as handle:
+            bboxes = pickle.load(handle)
+
+        x, y, w, h = bboxes[image_name]
+        print(image_name, bboxes[image_name])
         image_x = cv2.resize(crop_face_from_scene(image_x_temp, [y, x, w, h], face_scale), (self.img_size, self.img_size))
         
         if spoofing_label == 1:
