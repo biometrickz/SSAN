@@ -47,7 +47,8 @@ class ToTensor_valtest_video(object):
         # swap color axis because    BGR2RGB
         # numpy image: (batch_size) x T x H x W x C
         # torch image: (batch_size) x T x C X H X W
-        image_x = image_x[:,:,:,::-1].transpose((0, 3, 1, 2))
+        # image_x = image_x[:,:,:,::-1].transpose((0, 3, 1, 2))
+        image_x = image_x[:,:,::-1].transpose((2, 0, 1))
         image_x = np.array(image_x)
         val_map_x = np.array(val_map_x)
         spoofing_label_np = np.array([0],dtype=np.long)
@@ -61,7 +62,9 @@ class ToTensor_valtest_video(object):
 def transformer_test_video():
     return transforms.Compose([Normaliztion_valtest_video(), ToTensor_valtest_video()])
 
-
 # use ImageNet mean and var for normalization
 def transformer_test_video_ImageNet():
     return transforms.Compose([ToTensor_valtest_video(), Normaliztion_valtest_video_ImageNet()])
+
+def transformer_custom():
+    return transforms.Compose([ToTensor_valtest_video(), Normaliztion_valtest_video()])

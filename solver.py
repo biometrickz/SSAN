@@ -113,7 +113,7 @@ def main(args):
         epoch_test = 1
         if epoch % epoch_test == epoch_test-1:
             if args.trans in ["o", "p"]:
-                test_data_dic = data_bank.get_datasets(train=False, protocol=args.protocol, img_size=args.img_size, transform=transformer_test_video(), debug_subset_size=args.debug_subset_size)
+                test_data_dic = data_bank.get_datasets(train=False, protocol=args.protocol, img_size=args.img_size, transform=transformer_custom(), debug_subset_size=args.debug_subset_size)
             elif args.trans in ["I"]:
                 test_data_dic = data_bank.get_datasets(train=False, protocol=args.protocol, img_size=args.img_size, transform=transformer_test_video_ImageNet(), debug_subset_size=args.debug_subset_size)
             else:
@@ -125,7 +125,7 @@ def main(args):
                 print("[{}/{}]Testing {}...".format(i+1, len(test_data_dic), test_name))
                 test_set = test_data_dic[test_name]
                 test_loader = DataLoader(test_set, batch_size=args.batch_size, shuffle=False, num_workers=8)
-                HTER, auc_test = test_video(model, args, test_loader, score_path, epoch, name=test_name)
+                HTER, auc_test = test(model, args, test_loader, score_path, epoch, name=test_name)
                 if auc_test-HTER>=eva["best_auc"]-eva["best_HTER"]:
                     eva["best_auc"] = auc_test
                     eva["best_HTER"] = HTER
@@ -151,32 +151,41 @@ def main(args):
             print("Model saved to {}".format(model_path))
 
 
-def test_video(model, args, test_loader, score_root_path, epoch, name=""):
+def test(model, args, test_loader, score_root_path, epoch, name=""):
     model.eval()
     with torch.no_grad():
         start_time = time.time()
         scores_list = []
+        scores = []
+        labels = []
         for i, sample_batched in enumerate(test_loader):
             image_x, label, map_x = sample_batched["image_x"].cuda(), sample_batched["label"].cuda(), sample_batched["map_x"].cuda()
-            map_score = 0
-            for frame_i in range(image_x.shape[1]):
-                if args.model_type in ["SSAN_R"]:
-                    cls_x1_x1, fea_x1_x1, fea_x1_x2, _ = model(image_x[:,frame_i,:,:,:], image_x[:,frame_i,:,:,:])
-                    score_norm = torch.softmax(cls_x1_x1, dim=1)[:, 1]
-                elif args.model_type in ["SSAN_M"]:
-                    pred_map, fea_x1_x1, fea_x1_x2, _ = model(image_x[:,frame_i,:,:,:], image_x[:,frame_i,:,:,:])
-                    score_norm = torch.sum(pred_map, dim=(1, 2))/(args.map_size*args.map_size)
-                map_score += score_norm
-            map_score = map_score/image_x.shape[1]
-            for ii in range(image_x.shape[0]):
-                scores_list.append("{} {}\n".format(map_score[ii], label[ii][0]))
-            
-        map_score_val_filename = os.path.join(score_root_path, "{}_score.txt".format(name))
-        print("score: write test scores to {}".format(map_score_val_filename))
-        with open(map_score_val_filename, 'w') as file:
-            file.writelines(scores_list)
+            # map_score = 0
+            score_norm = None
+            # for frame_i in range(image_x.shape[0]):
+            if args.model_type in ["SSAN_R"]:                                                   
+                cls_x1_x1, fea_x1_x1, fea_x1_x2, _ = model(image_x, image_x)
+                score_norm = torch.softmax(cls_x1_x1, dim=1)[:, 1]
+            elif args.model_type in ["SSAN_M"]:
+                pred_map, fea_x1_x1, fea_x1_x2, _ = model(image_x, image_x)
+                score_norm = torch.sum(pred_map, dim=(1, 2))/(args.map_size*args.map_size)
+                # map_score += score_norm
+            for sc in score_norm.tolist():
+                scores.append(sc)
+            for sc in label.tolist():
+                labels.append(sc[0]) 
+                       
+        #         # score_norm = score_norm/image_x.shape[0]
+        #     for ii in range(image_x.shape[0]):
+        #         scores_list.append("{} {}\n".format(score_norm[ii], label[ii][0]))
 
-        test_ACC, fpr, FRR, HTER, auc_test, test_err = performances_val(map_score_val_filename)
+        # map_score_val_filename = os.path.join(score_root_path, "{}_score.txt".format(name))
+        # print("score: write test scores to {}".format(map_score_val_filename))
+        # with open(map_score_val_filename, 'w') as file:
+        #     file.writelines(scores_list)
+        # test_ACC, fpr, FRR, HTER, auc_test, test_err = performances_val(map_score_val_filename)
+        test_ACC, fpr, FRR, HTER, auc_test, test_err = performances_val2(scores, labels)
+
         print("## {} score:".format(name))
         print("epoch:{:d}, test:  val_ACC={:.4f}, HTER={:.4f}, AUC={:.4f}, val_err={:.4f}, ACC={:.4f}".format(epoch+1, test_ACC, HTER, auc_test, test_err, test_ACC))
         print("test phase cost {:.4f}s".format(time.time()-start_time))

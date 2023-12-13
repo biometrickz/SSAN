@@ -9,6 +9,22 @@ def get_err_threhold(fpr, tpr, threshold):
     err = fpr[right_index]    
     return err, best_th, right_index
 
+def performances_val2(val_scores, val_labels):
+    fpr,tpr,threshold = roc_curve(val_labels, val_scores, pos_label=1)
+    auc_test = auc(fpr, tpr)
+    val_err, val_threshold, right_index = get_err_threhold(fpr, tpr, threshold)
+    
+    type1 = len([s for i, s in enumerate(val_scores) if s < val_threshold and val_labels[i] == 1])
+    type2 = len([s for i, s in enumerate(val_scores) if s > val_threshold and val_labels[i] == 0])
+    
+    val_ACC = 1-(type1 + type2) / len(val_labels)
+    
+    FRR = 1- tpr    # FRR = 1 - TPR
+    
+    HTER = (fpr+FRR)/2.0    # error recognition rate &  reject recognition rate
+    
+    return val_ACC, fpr[right_index], FRR[right_index], HTER[right_index], auc_test, val_err
+
 def performances_val(map_score_val_filename):
     with open(map_score_val_filename, 'r') as file:
         lines = file.readlines()
@@ -19,21 +35,16 @@ def performances_val(map_score_val_filename):
     num_real = 0.0
     num_fake = 0.0
     for line in lines:
-        try:
-            count += 1
-            tokens = line.split()
-            score = float(tokens[0])
-            label = float(tokens[1])  # int(tokens[1])
-            val_scores.append(score)
-            val_labels.append(label)
-            data.append({'map_score': score, 'label': label})
-            if label==1:
-                num_real += 1
-            else:
-                num_fake += 1
-        except:
-            continue
+        # try:
+        count += 1
+        tokens = line.split()
+        score = float(tokens[0])
+        label = float(tokens[1])  # int(tokens[1])
+        val_scores.append(score)
+        val_labels.append(label)
+        data.append({'map_score': score, 'label': label})
     
+    print("BBBBBBBBB", len(val_labels), len(val_scores))
     fpr,tpr,threshold = roc_curve(val_labels, val_scores, pos_label=1)
     auc_test = auc(fpr, tpr)
     val_err, val_threshold, right_index = get_err_threhold(fpr, tpr, threshold)
