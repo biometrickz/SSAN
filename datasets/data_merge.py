@@ -1,6 +1,5 @@
 import os
 import torch
-import cv2
 from .Load_OULUNPU_train import Spoofing_train as Spoofing_train_oulu
 from .Load_Custom import Spoofing_custom
 from .Load_OULUNPU_valtest import Spoofing_valtest as Spoofing_valtest_oulu
