@@ -112,13 +112,14 @@ def main(args):
         # test
         epoch_test = 1
         if epoch % epoch_test == epoch_test-1:
-            if args.trans in ["o", "p"]:
+            if args.trans in ["c"]:
                 test_data_dic = data_bank.get_datasets(train=False, protocol=args.protocol, img_size=args.img_size, transform=transformer_custom(), debug_subset_size=args.debug_subset_size)
+            elif args.trans in ["o", "p"]:
+                test_data_dic = data_bank.get_datasets(train=False, protocol=args.protocol, img_size=args.img_size, transform=transformer_test_video(), debug_subset_size=args.debug_subset_size)
             elif args.trans in ["I"]:
                 test_data_dic = data_bank.get_datasets(train=False, protocol=args.protocol, img_size=args.img_size, transform=transformer_test_video_ImageNet(), debug_subset_size=args.debug_subset_size)
             else:
                 raise Exception
-            map_score_name_list = []
             score_path = os.path.join(score_root_path, "epoch_{}".format(epoch+1))
             check_folder(score_path)
             for i, test_name in enumerate(test_data_dic.keys()):

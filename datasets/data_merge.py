@@ -18,24 +18,14 @@ class data_merge(object):
     def __init__(self, image_dir):
         self.dic = {}
         self.image_dir = image_dir
+        INSIGHTFACE = dataset_info()
+        INSIGHTFACE.root_dir = os.path.join(self.image_dir, "sample_dataset")
+        self.dic["INSIGHTFACE"] = INSIGHTFACE
         CUSTOM = dataset_info()
         CUSTOM.root_dir = os.path.join(self.image_dir, "sample_dataset")
         self.dic["Custom"] = CUSTOM
-        CASIA_MFSD_info = dataset_info()
-        CASIA_MFSD_info.root_dir = os.path.join(self.image_dir, "img_CASIA_FASD")
-        self.dic["CASIA_MFSD"] = CASIA_MFSD_info
-        # Replay_attack
-        Replay_attack_info = dataset_info()
-        Replay_attack_info.root_dir = os.path.join(self.image_dir, "img_replayattack")
-        self.dic["Replay_attack"] = Replay_attack_info
-        # MSU_MFSD
-        MSU_MFSD_info = dataset_info()
-        MSU_MFSD_info.root_dir = os.path.join(self.image_dir, "img_MSU_MFSD")
-        self.dic["MSU_MFSD"] = MSU_MFSD_info
-        # OULU
-        OULU_info = dataset_info()
-        OULU_info.root_dir = os.path.join(self.image_dir, "oulu_images_crop")
-        self.dic["OULU"] = OULU_info
+
+
 
     def get_single_dataset(self, data_name="", train=True, img_size=256, map_size=32, transform=None, debug_subset_size=None, UUID=-1):
         if train:
