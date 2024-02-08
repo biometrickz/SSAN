@@ -1,29 +1,24 @@
 import argparse
-import os
-import torch
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
     # build dirs
-    parser.add_argument('--d1', type=str, default="/media/yeldar/C4EBBAE4D0BBE84F", help='padded_dir')
-    parser.add_argument('--d2', type=str, default="/media/yeldar/C4EBBAE4D0BBE84F", help='insight_dir')
-    parser.add_argument('--d3', type=str, default="/media/yeldar/C4EBBAE4D0BBE84F", help='joined_dir')
-
+    parser.add_argument('--data_dir', type=str, default="/home/yeldar/Documents/Liveness/datasets/sample_dataset/Custom", help='all_data_dir')
     parser.add_argument('--result_path', type=str, default='./results', help='root result directory')
     parser.add_argument('--result_name', type=str, default='D1D2D3', help='result directory')
     # training settings
     parser.add_argument('--model_type', type=str, default="SSAN_R", help='model_type')
-    parser.add_argument('--batch_size', type=int, default=8, help='batch size')
+    parser.add_argument('--batch_size', type=int, default=8, help='batch size') # authors have batch_size=16 
     parser.add_argument('--img_size', type=int, default=256, help='img size')
     parser.add_argument('--map_size', type=int, default=32, help='depth map size')
     parser.add_argument('--protocol', type=str, default="Custom", help='protocal')
     parser.add_argument('--device', type=str, default='0,1', help='device id, format is like 0,1,2')
     parser.add_argument('--base_lr', type=float, default=0.0001, help='base learning rate')
     parser.add_argument('--start_epoch', type=int, default=0, help='start epoch')
-    parser.add_argument('--num_epochs', type=int, default=30, help='total training epochs')
-    parser.add_argument('--print_freq', type=int, default=10, help='print frequency')
-    parser.add_argument('--step_size', type=int, default=500, help='how many epochs lr decays once')
+    parser.add_argument('--num_epochs', type=int, default=10, help='total training epochs')
+    parser.add_argument('--print_freq', type=int, default=5, help='print frequency')
+    parser.add_argument('--step_size', type=int, default=5, help='how many epochs lr decays once')
     parser.add_argument('--gamma', type=float, default=0.5, help='gamma of optim.lr_scheduler.StepLR, decay of lr')
     parser.add_argument('--trans', type=str, default="o", help="different pre-process")
     # optimizer
