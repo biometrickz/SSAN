@@ -16,34 +16,35 @@ class data_merge(object):
         self.datasets = ["INSIGHTFACE", "PADDED", "JOINED"]
         self.image_dir = image_dir
         INSIGHTFACE = dataset_info()
-        INSIGHTFACE.root_dir = os.path.join(self.image_dir, "sample_dataset")
+        INSIGHTFACE.root_dir = os.path.join(self.image_dir, "insight")
         self.dic["INSIGHTFACE"] = INSIGHTFACE
         PADDED = dataset_info()
-        PADDED.root_dir = os.path.join(self.image_dir, "sample_dataset")
+        PADDED.root_dir = os.path.join(self.image_dir, "padded")
         self.dic["PADDED"] = PADDED
         JOINED = dataset_info()
-        JOINED.root_dir = os.path.join(self.image_dir, "sample_dataset")
+        JOINED.root_dir = os.path.join(self.image_dir, "joined")
         self.dic["JOINED"] = JOINED
         CUSTOM = dataset_info()
         CUSTOM.root_dir = os.path.join(self.image_dir, "sample_dataset")
         self.dic["Custom"] = CUSTOM
 
 
-
     def get_single_dataset(self, data_name="", train=True, img_size=256, map_size=32, transform=None, debug_subset_size=None, UUID=-1):
+        data_dir = self.dic[data_name].root_dir
+        depth_dir = os.path.join(self.image_dir, 'DEPTH')
         if train:
-            data_dir = self.dic[data_name].root_dir
             if data_name in self.datasets:
-                data_set = Spoofing_custom(os.path.join(data_dir, "train_list.csv"), os.path.join(data_dir, "Train_files"), transform=transform, img_size=img_size, map_size=map_size, UUID=UUID)
+                data_set = Spoofing_custom(os.path.join(data_dir, "train/live/train_list.csv"), os.path.join(data_dir, "train/live"), depth_dir, transform=transform, img_size=img_size, map_size=map_size, UUID=UUID)
+                data_set += Spoofing_custom(os.path.join(data_dir, "train/spoof/train_list.csv"), os.path.join(data_dir, "train/spoof"), depth_dir, transform=transform, img_size=img_size, map_size=map_size, UUID=UUID)
             else:
                 print("NO DATASET Found")
                 exit()    
             if debug_subset_size is not None:
                 data_set = torch.utils.data.Subset(data_set, range(0, debug_subset_size))
         else:
-            data_dir = self.dic[data_name].root_dir
             if data_name in self.datasets:
-                data_set = Spoofing_custom(os.path.join(data_dir, "val_list.csv"), os.path.join(data_dir, "Val_files"), transform=transform, img_size=img_size, map_size=map_size, UUID=UUID)
+                data_set = Spoofing_custom(os.path.join(data_dir, "val/live/val_list.csv"), os.path.join(data_dir, "val/live"), depth_dir, transform=transform, img_size=img_size, map_size=map_size, UUID=UUID)
+                data_set += Spoofing_custom(os.path.join(data_dir, "val/spoof/val_list.csv"), os.path.join(data_dir, "val/spoof"), depth_dir, transform=transform, img_size=img_size, map_size=map_size, UUID=UUID)
             else:
                 print("NO DATASET Found")
                 exit() 

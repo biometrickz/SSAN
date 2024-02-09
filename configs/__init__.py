@@ -6,9 +6,9 @@ def parse_args():
     # build dirs
     parser.add_argument('--data_dir', type=str, default="/home/yeldar/Documents/Liveness/datasets/sample_dataset/Custom", help='all_data_dir')
     parser.add_argument('--result_path', type=str, default='./results', help='root result directory')
-    parser.add_argument('--result_name', type=str, default='D1D2D3', help='result directory')
+    parser.add_argument('--result_name', type=str, default='D1D2D3_M', help='result directory')
     # training settings
-    parser.add_argument('--model_type', type=str, default="SSAN_R", help='model_type')
+    parser.add_argument('--model_type', type=str, default="SSAN_M", help='model_type')
     parser.add_argument('--batch_size', type=int, default=8, help='batch size') # authors have batch_size=16 
     parser.add_argument('--img_size', type=int, default=256, help='img size')
     parser.add_argument('--map_size', type=int, default=32, help='depth map size')
