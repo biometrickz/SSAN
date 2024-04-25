@@ -4,7 +4,7 @@ import os
 from networks import get_model
 from datasets import data_merge
 from optimizers import get_optimizer
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader
 from transformers import *
 from utils import *
 from configs import parse_args
@@ -18,19 +18,14 @@ torch.manual_seed(16)
 np.random.seed(16)
 random.seed(16)
 
-
 def main(args):
+    st = time.time()
     data_bank = data_merge(args.data_dir)
-    # define train loader
-    if args.trans in ["o"]:
-        train_set = data_bank.get_datasets(train=True, protocol=args.protocol, img_size=args.img_size, map_size=args.map_size, transform=transformer_train(), debug_subset_size=args.debug_subset_size)
-    elif args.trans in ["p"]:
-        train_set = data_bank.get_datasets(train=True, protocol=args.protocol, img_size=args.img_size, map_size=args.map_size, transform=transformer_train_pure(), debug_subset_size=args.debug_subset_size)
-    elif args.trans in ["I"]:
-        train_set = data_bank.get_datasets(train=True, protocol=args.protocol, img_size=args.img_size, map_size=args.map_size, transform=transformer_train_ImageNet(), debug_subset_size=args.debug_subset_size)
-    else:
-        raise Exception
-    train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True, num_workers=4)
+    train_set = data_bank.get_datasets(train=True, protocol=args.protocol, img_size=args.img_size, map_size=args.map_size, transform=transformer_train(), debug_subset_size=args.debug_subset_size)
+
+    num_workers = 16
+    train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True, num_workers=num_workers)
+    print("Number of worker threads:", num_workers)
     max_iter = args.num_epochs*len(train_loader)
     # define model
     model = get_model(args.model_type, max_iter).cuda()
@@ -63,8 +58,9 @@ def main(args):
         "best_HTER": 100,
         "best_auc": -100
     }
-
     for epoch in range(args.start_epoch, args.num_epochs):
+        est = time.time()
+
         binary_loss_record = AvgrageMeter()
         constra_loss_record = AvgrageMeter()
         adv_loss_record = AvgrageMeter()
@@ -72,6 +68,7 @@ def main(args):
         # train
         model.train()
         for i, sample_batched in enumerate(train_loader):
+            # print("HEY", sample_batched.shape)
             image_x, label, UUID = sample_batched["image_x"].cuda(), sample_batched["label"].cuda(), sample_batched["UUID"].cuda()
             if args.model_type in ["SSAN_R"]:
                 rand_idx = torch.randperm(image_x.shape[0])
@@ -102,24 +99,21 @@ def main(args):
             loss_all.backward()
             optimizer.step()
             lr = optimizer.param_groups[0]['lr']
+            # st = time.time()
+
             if i % args.print_freq == args.print_freq - 1:
                 print("epoch:{:d}, mini-batch:{:d}, lr={:.4f}, binary_loss={:.4f}, constra_loss={:.4f}, adv_loss={:.4f}, Loss={:.4f}".format(epoch + 1, i + 1, lr, binary_loss_record.avg, constra_loss_record.avg, adv_loss_record.avg, loss_record.avg))
         
         # whole epoch average
         print("epoch:{:d}, Train: lr={:f}, Loss={:.4f}".format(epoch + 1, lr, loss_record.avg))
+        epe = time.time()
+        print("Time spent on 1 epoch is: ", epe-est)
         scheduler.step()
 
         # test
         epoch_test = 1
         if epoch % epoch_test == epoch_test-1:
-            if args.trans in ["c"]:
-                test_data_dic = data_bank.get_datasets(train=False, protocol=args.protocol, img_size=args.img_size, transform=transformer_custom(), debug_subset_size=args.debug_subset_size)
-            elif args.trans in ["o", "p"]:
-                test_data_dic = data_bank.get_datasets(train=False, protocol=args.protocol, img_size=args.img_size, transform=transformer_test_video(), debug_subset_size=args.debug_subset_size)
-            elif args.trans in ["I"]:
-                test_data_dic = data_bank.get_datasets(train=False, protocol=args.protocol, img_size=args.img_size, transform=transformer_test_video_ImageNet(), debug_subset_size=args.debug_subset_size)
-            else:
-                raise Exception
+            test_data_dic = data_bank.get_datasets(train=False, protocol=args.protocol, img_size=args.img_size, transform=transformer_custom(), debug_subset_size=args.debug_subset_size)
             score_path = os.path.join(score_root_path, "epoch_{}".format(epoch+1))
             check_folder(score_path)
             for i, test_name in enumerate(test_data_dic.keys()):

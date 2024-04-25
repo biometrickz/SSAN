@@ -6,7 +6,7 @@ def parse_args():
     # build dirs
     parser.add_argument('--data_dir', type=str, default="/home/yeldar/Documents/Liveness/datasets/sample_dataset/Custom", help='all_data_dir')
     parser.add_argument('--result_path', type=str, default='./results', help='root result directory')
-    parser.add_argument('--result_name', type=str, default='D1D2D3_M', help='result directory')
+    parser.add_argument('--result_name', type=str, default='D123_M', help='result directory')
     # training settings
     parser.add_argument('--model_type', type=str, default="SSAN_M", help='model_type')
     parser.add_argument('--batch_size', type=int, default=8, help='batch size') # authors have batch_size=16 
@@ -20,7 +20,6 @@ def parse_args():
     parser.add_argument('--print_freq', type=int, default=5, help='print frequency')
     parser.add_argument('--step_size', type=int, default=5, help='how many epochs lr decays once')
     parser.add_argument('--gamma', type=float, default=0.5, help='gamma of optim.lr_scheduler.StepLR, decay of lr')
-    parser.add_argument('--trans', type=str, default="o", help="different pre-process")
     # optimizer
     parser.add_argument('--momentum', type=float, default=0.9)
     parser.add_argument('--optimizer', type=str, default='adam', help='optimizer')
