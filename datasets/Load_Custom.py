@@ -6,6 +6,7 @@ import os
 from utils import *
 from glob import glob
 
+
 class Spoofing_custom(Dataset):
     
     def __init__(self, info_list, root_dir,  depth_dir, transform=None, img_size=256, map_size=32, UUID=-1, size=100):
@@ -23,7 +24,7 @@ class Spoofing_custom(Dataset):
     def __getitem__(self, idx):
         image_name = str(self.labels.iloc[idx, 1])
         image_path = os.path.join(self.root_dir, image_name)
-        spoofing_label = self.labels.iloc[idx, 0]
+        spoofing_label = int(self.labels.iloc[idx, 0])
         image_x, map_x = self.get_single_image_x(image_path, image_name, spoofing_label)
         sample = {'image_x': image_x, 'map_x': map_x, 'label': spoofing_label, "UUID": self.UUID}
         if self.transform:
@@ -34,16 +35,14 @@ class Spoofing_custom(Dataset):
         
         image_x_temp = cv2.imread(image_path)
         image_x = cv2.resize(image_x_temp, (self.img_size, self.img_size))
-        
+        map_x = np.zeros((self.map_size, self.map_size))
         if spoofing_label == 1:
-            map_name = "{}_depth.jpeg".format(image_name.split('.')[0])
+            map_name = "{}_depth.jpg".format(extract_name_before_jpg(image_name, extension=get_file_extension(image_name)))
             map_path = os.path.join(self.map_root_dir, map_name)
-            map_x_temp = cv2.imread(map_path, 0)
             try:
+                map_x_temp = cv2.imread(map_path, 0)
                 map_x = cv2.resize(map_x_temp, (self.map_size, self.map_size))
             except:
                 print(map_name)
-        else:
-            map_x = np.zeros((self.map_size, self.map_size))
 
         return image_x, map_x

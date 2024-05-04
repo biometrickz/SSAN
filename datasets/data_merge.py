@@ -30,6 +30,8 @@ class data_merge(object):
         CUSTOM = dataset_info()
         CUSTOM.root_dir = os.path.join(self.image_dir, "sample_dataset")
         self.dic["Custom"] = CUSTOM
+        self.train_size = 1000000
+        self.test_size = 100000
 
 
     def get_single_dataset(self, data_name="", train=True, img_size=256, map_size=32, transform=None, debug_subset_size=None, UUID=-1):
@@ -37,8 +39,8 @@ class data_merge(object):
         depth_dir = os.path.join(self.image_dir, 'PATCHNET_DEPTH')
         if train:
             if data_name in self.datasets:
-                data_set = Spoofing_custom(os.path.join(data_dir, "train/live/train_list.csv"), os.path.join(data_dir, "train/live"), depth_dir, transform=transform, img_size=img_size, map_size=map_size, UUID=UUID, size=10000)
-                data_set += Spoofing_custom(os.path.join(data_dir, "train/mask/train_list.csv"), os.path.join(data_dir, "train/mask"), depth_dir, transform=transform, img_size=img_size, map_size=map_size, UUID=UUID, size = 10000)
+                data_set = Spoofing_custom(os.path.join(data_dir, "train/live/train_list.csv"), os.path.join(data_dir, "train/live"), depth_dir, transform=transform, img_size=img_size, map_size=map_size, UUID=UUID, size=self.train_size)
+                data_set += Spoofing_custom(os.path.join(data_dir, "train/mask/train_list.csv"), os.path.join(data_dir, "train/mask"), depth_dir, transform=transform, img_size=img_size, map_size=map_size, UUID=UUID, size=self.train_size)
             else:
                 print("NO DATASET Found")
                 exit()    
@@ -46,8 +48,8 @@ class data_merge(object):
                 data_set = torch.utils.data.Subset(data_set, range(0, debug_subset_size))
         else:
             if data_name in self.datasets:
-                data_set = Spoofing_custom(os.path.join(data_dir, "val/live/val_list.csv"), os.path.join(data_dir, "val/live"), depth_dir, transform=transform, img_size=img_size, map_size=map_size, UUID=UUID, size = 1000)
-                data_set += Spoofing_custom(os.path.join(data_dir, "val/mask/val_list.csv"), os.path.join(data_dir, "val/mask"), depth_dir, transform=transform, img_size=img_size, map_size=map_size, UUID=UUID, size = 1000)
+                data_set = Spoofing_custom(os.path.join(data_dir, "val/live/val_list.csv"), os.path.join(data_dir, "val/live"), depth_dir, transform=transform, img_size=img_size, map_size=map_size, UUID=UUID, size=self.test_size)
+                data_set += Spoofing_custom(os.path.join(data_dir, "val/mask/val_list.csv"), os.path.join(data_dir, "val/mask"), depth_dir, transform=transform, img_size=img_size, map_size=map_size, UUID=UUID, size=self.test_size)
             else:
                 print("NO DATASET Found")
                 exit() 

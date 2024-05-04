@@ -32,8 +32,6 @@ def performances_val(map_score_val_filename):
     val_labels = []
     data = []
     count = 0.0
-    num_real = 0.0
-    num_fake = 0.0
     for line in lines:
         # try:
         count += 1
@@ -44,7 +42,6 @@ def performances_val(map_score_val_filename):
         val_labels.append(label)
         data.append({'map_score': score, 'label': label})
     
-    print("BBBBBBBBB", len(val_labels), len(val_scores))
     fpr,tpr,threshold = roc_curve(val_labels, val_scores, pos_label=1)
     auc_test = auc(fpr, tpr)
     val_err, val_threshold, right_index = get_err_threhold(fpr, tpr, threshold)

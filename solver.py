@@ -24,7 +24,7 @@ def main(args):
     st = time.time()
     data_bank = data_merge(args.data_dir)
     # define train loader
-    train_set = data_bank.get_datasets(train=True, protocol=args.protocol, img_size=args.img_size, map_size=args.map_size, transform=transformer_train(), debug_subset_size=args.debug_subset_size)
+    train_set = data_bank.get_datasets(train=True, protocol=args.protocol, img_size=args.img_size, map_size=args.map_size, transform=transformer_train_pure(), debug_subset_size=args.debug_subset_size)
 
     num_workers = 16
     train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True, num_workers=num_workers)
@@ -116,14 +116,14 @@ def main(args):
         # test
         epoch_test = 1
         if epoch % epoch_test == epoch_test-1:
-            test_data_dic = data_bank.get_datasets(train=False, protocol=args.protocol, img_size=args.img_size, transform=transformer_custom(), debug_subset_size=args.debug_subset_size)
+            test_data_dic = data_bank.get_datasets(train=False, protocol=args.protocol, img_size=args.img_size, transform=transformer_test_video(), debug_subset_size=args.debug_subset_size)
 
             score_path = os.path.join(score_root_path, "epoch_{}".format(epoch+1))
             check_folder(score_path)
             for i, test_name in enumerate(test_data_dic.keys()):
                 print("[{}/{}]Testing {}...".format(i+1, len(test_data_dic), test_name))
                 test_set = test_data_dic[test_name]
-                test_loader = DataLoader(test_set, batch_size=args.batch_size, shuffle=False, num_workers=num_workers)
+                test_loader = DataLoader(test_set, batch_size=args.batch_size, shuffle=True, num_workers=num_workers)
                 HTER, auc_test = test(model, args, test_loader, score_path, epoch, name=test_name)
                 if auc_test-HTER>=eva["best_auc"]-eva["best_HTER"]:
                     eva["best_auc"] = auc_test
@@ -157,7 +157,6 @@ def test(model, args, test_loader, score_root_path, epoch, name=""):
         scores = []
         for i, sample_batched in enumerate(test_loader):
             image_x, label, map_x = sample_batched["image_x"].cuda(), sample_batched["label"].cuda(), sample_batched["map_x"].cuda()
-            print("HEY", image_x.shape)
             # map_score = 0
             # for frame_i in range(image_x.shape[1]):
             #     if args.model_type in ["SSAN_R"]:
