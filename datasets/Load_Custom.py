@@ -8,8 +8,8 @@ from glob import glob
 
 class Spoofing_custom(Dataset):
     
-    def __init__(self, info_list, root_dir,  depth_dir, transform=None, img_size=256, map_size=32, UUID=-1):
-        self.labels = pd.read_csv(info_list, delimiter=",", header=None).drop([0], axis=0)[:500]
+    def __init__(self, info_list, root_dir,  depth_dir, transform=None, img_size=256, map_size=32, UUID=-1, size=100):
+        self.labels = pd.read_csv(info_list, delimiter=",", header=None).drop([0], axis=0)[:size]
         self.root_dir = root_dir
         self.map_root_dir = depth_dir
         self.transform = transform

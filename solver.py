@@ -123,7 +123,7 @@ def main(args):
             for i, test_name in enumerate(test_data_dic.keys()):
                 print("[{}/{}]Testing {}...".format(i+1, len(test_data_dic), test_name))
                 test_set = test_data_dic[test_name]
-                test_loader = DataLoader(test_set, batch_size=args.batch_size, shuffle=False, num_workers=8)
+                test_loader = DataLoader(test_set, batch_size=args.batch_size, shuffle=False, num_workers=num_workers)
                 HTER, auc_test = test(model, args, test_loader, score_path, epoch, name=test_name)
                 if auc_test-HTER>=eva["best_auc"]-eva["best_HTER"]:
                     eva["best_auc"] = auc_test
@@ -157,18 +157,27 @@ def test(model, args, test_loader, score_root_path, epoch, name=""):
         scores = []
         for i, sample_batched in enumerate(test_loader):
             image_x, label, map_x = sample_batched["image_x"].cuda(), sample_batched["label"].cuda(), sample_batched["map_x"].cuda()
-            map_score = 0
-            for frame_i in range(image_x.shape[1]):
-                if args.model_type in ["SSAN_R"]:
-                    cls_x1_x1, fea_x1_x1, fea_x1_x2, _ = model(image_x[:,frame_i,:,:,:], image_x[:,frame_i,:,:,:])
-                    score_norm = torch.softmax(cls_x1_x1, dim=1)[:, 1]
-                elif args.model_type in ["SSAN_M"]:
-                    pred_map, fea_x1_x1, fea_x1_x2, _ = model(image_x[:,frame_i,:,:,:], image_x[:,frame_i,:,:,:])
-                    score_norm = torch.sum(pred_map, dim=(1, 2))/(args.map_size*args.map_size)
-                map_score += score_norm
-            map_score = map_score/image_x.shape[1]
+            print("HEY", image_x.shape)
+            # map_score = 0
+            # for frame_i in range(image_x.shape[1]):
+            #     if args.model_type in ["SSAN_R"]:
+            #         cls_x1_x1, fea_x1_x1, fea_x1_x2, _ = model(image_x[:,frame_i,:,:,:], image_x[:,frame_i,:,:,:])
+            #         score_norm = torch.softmax(cls_x1_x1, dim=1)[:, 1]
+            #     elif args.model_type in ["SSAN_M"]:
+            #         pred_map, fea_x1_x1, fea_x1_x2, _ = model(image_x[:,frame_i,:,:,:], image_x[:,frame_i,:,:,:])
+            #         score_norm = torch.sum(pred_map, dim=(1, 2))/(args.map_size*args.map_size)
+            #     map_score += score_norm
+            # map_score = map_score/image_x.shape[1]
+
+            if args.model_type in ["SSAN_R"]:                                                   
+                cls_x1_x1, fea_x1_x1, fea_x1_x2, _ = model(image_x, image_x)
+                score_norm = torch.softmax(cls_x1_x1, dim=1)[:, 1]
+            elif args.model_type in ["SSAN_M"]:
+                pred_map, fea_x1_x1, fea_x1_x2, _ = model(image_x, image_x)
+                score_norm = torch.sum(pred_map, dim=(1, 2))/(args.map_size*args.map_size)
+
             for ii in range(image_x.shape[0]):
-                scores.append("{} {}\n".format(map_score[ii], label[ii][0]))
+                scores.append("{} {}\n".format(score_norm[ii], label[ii][0]))
                        
         map_score_val_filename = os.path.join(score_root_path, "{}_score.txt".format(name))
         print("score: write test scores to {}".format(map_score_val_filename))
