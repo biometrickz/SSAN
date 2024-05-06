@@ -26,7 +26,18 @@ def check_folder(log_dir):
     return log_dir
 
 
-def extract_name_before_jpg(filename: str, extension='.jpg') -> str:
+def get_file_extension(filename: str) -> str:
+    # Use os.path.splitext() to split the filename into root and extension
+    root, extension = os.path.splitext(filename)
+    
+    # Return the extension, which includes the dot (e.g., '.jpg')
+    return extension
+
+
+def extract_name_without_extension(filename: str) -> str:
+    
+    extension = get_file_extension(filename)
+
     # Find the index of the substring '.jpg' in the filename
     index = filename.rfind(extension)
     
@@ -41,9 +52,3 @@ def extract_name_before_jpg(filename: str, extension='.jpg') -> str:
     return name_before_jpg
 
 
-def get_file_extension(filename: str) -> str:
-    # Use os.path.splitext() to split the filename into root and extension
-    root, extension = os.path.splitext(filename)
-    
-    # Return the extension, which includes the dot (e.g., '.jpg')
-    return extension

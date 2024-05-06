@@ -37,7 +37,7 @@ class Spoofing_custom(Dataset):
         image_x = cv2.resize(image_x_temp, (self.img_size, self.img_size))
         map_x = np.zeros((self.map_size, self.map_size))
         if spoofing_label == 1:
-            map_name = "{}_depth.jpg".format(extract_name_before_jpg(image_name, extension=get_file_extension(image_name)))
+            map_name = "{}_depth.jpg".format(extract_name_without_extension(image_name))
             map_path = os.path.join(self.map_root_dir, map_name)
             try:
                 map_x_temp = cv2.imread(map_path, 0)
