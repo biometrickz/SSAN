@@ -23,7 +23,7 @@ random.seed(16)
 
 def main(args):
     st = time.time()
-    data_bank = data_merge(args.data_dir, train_size=1000, val_size=100)
+    data_bank = data_merge(args.data_dir, train_size=1000000, val_size=40000)
     # define train loader
     train_set = data_bank.get_datasets(train=True, protocol=args.protocol, img_size=args.img_size, map_size=args.map_size, transform=transformer_train_pure(), debug_subset_size=args.debug_subset_size)
 

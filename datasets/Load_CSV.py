@@ -9,9 +9,8 @@ from glob import glob
 
 class Spoofing_custom(Dataset):
     
-    def __init__(self, info_list, root_dir,  depth_dir, transform=None, img_size=256, map_size=32, UUID=-1, size=100):
+    def __init__(self, info_list, depth_dir, transform=None, img_size=256, map_size=32, UUID=-1, size=100):
         self.labels = pd.read_csv(info_list, delimiter=",", header=None).drop([0], axis=0)[:size]
-        self.root_dir = root_dir
         self.map_root_dir = depth_dir
         self.transform = transform
         self.img_size = img_size
@@ -23,7 +22,7 @@ class Spoofing_custom(Dataset):
     
     def __getitem__(self, idx):
         image_path =  str(self.labels.iloc[idx, 0])
-        spoofing_label = int(self.labels.iloc[idx, 1])
+        spoofing_label = int(float(self.labels.iloc[idx, 1]))
         try:
             image_x, map_x = self.get_single_image_x(image_path, spoofing_label)
 
@@ -33,11 +32,12 @@ class Spoofing_custom(Dataset):
             
             return sample
         except Exception as e:
+            print(self.labels.iloc[idx, 1])
             print(f"Warning: Could not read image at {image_path}. Skipping this image. Error: {e}")
             return self.__getitem__((idx + 1) % len(self.labels))
 
     
-    def get_single_image_x(self, image_path, image_name, spoofing_label):
+    def get_single_image_x(self, image_path, spoofing_label):
         
         image_name = os.path.basename(image_path)
         image_x_temp = cv2.imread(image_path)

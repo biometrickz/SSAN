@@ -2,7 +2,7 @@ import os
 import torch
 # from .Load_Custom import Spoofing_custom
 from .Load_CSV import Spoofing_custom
-
+import pandas as pd
 
 class dataset_info(object):
 
@@ -25,8 +25,8 @@ class data_merge(object):
 
     def get_single_dataset(self, data_name="", train=True, img_size=256, map_size=32, transform=None, debug_subset_size=None, UUID=-1):
         depth_dir = os.path.join(self.image_dir, 'PATCHNET_DEPTH')
-        train_csv = 'datasets/train.csv'
-        val_csv = 'datasets/val.csv'
+        train_csv = 'train.csv'
+        val_csv = 'val.csv'
         if train:
             if data_name in self.datasets:
                 data_set = Spoofing_custom(train_csv, depth_dir, transform=transform, img_size=img_size, map_size=map_size, UUID=UUID, size=self.train_size)
