@@ -25,11 +25,18 @@ class Spoofing_custom(Dataset):
         image_name = str(self.labels.iloc[idx, 1])
         image_path = os.path.join(self.root_dir, image_name)
         spoofing_label = int(self.labels.iloc[idx, 0])
-        image_x, map_x = self.get_single_image_x(image_path, image_name, spoofing_label)
-        sample = {'image_x': image_x, 'map_x': map_x, 'label': spoofing_label, "UUID": self.UUID}
-        if self.transform:
-            sample = self.transform(sample)
-        return sample
+        try:
+            image_x, map_x = self.get_single_image_x(image_path, image_name, spoofing_label)
+
+            sample = {'image_x': image_x, 'map_x': map_x, 'label': spoofing_label, "UUID": self.UUID}
+            if self.transform:
+                sample = self.transform(sample)
+            
+            return sample
+        except Exception as e:
+            print(f"Warning: Could not read image at {image_path}. Skipping this image. Error: {e}")
+            return self.__getitem__((idx + 1) % len(self.labels))
+
     
     def get_single_image_x(self, image_path, image_name, spoofing_label):
         

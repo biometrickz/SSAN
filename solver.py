@@ -12,6 +12,7 @@ import time
 import numpy as np
 import random
 from loss import *
+from torch.utils.tensorboard import SummaryWriter
 
 
 torch.manual_seed(16)
@@ -22,7 +23,7 @@ random.seed(16)
 
 def main(args):
     st = time.time()
-    data_bank = data_merge(args.data_dir)
+    data_bank = data_merge(args.data_dir, train_size=1000, val_size=100)
     # define train loader
     train_set = data_bank.get_datasets(train=True, protocol=args.protocol, img_size=args.img_size, map_size=args.map_size, transform=transformer_train_pure(), debug_subset_size=args.debug_subset_size)
 
@@ -42,6 +43,9 @@ def main(args):
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.step_size, gamma=args.gamma)
     model = nn.DataParallel(model).cuda()
 
+
+    tb_root_path = os.path.join(args.result_path, args.result_name, "tb")
+    check_folder(tb_root_path)
     # make dirs
     model_root_path = os.path.join(args.result_path, args.result_name, "model")
     check_folder(model_root_path)
@@ -54,6 +58,9 @@ def main(args):
     binary_fuc = nn.CrossEntropyLoss()
     map_fuc = nn.MSELoss()
     contra_fun = ContrastLoss()
+
+    # Initialize TensorBoard writer
+    writer = SummaryWriter(tb_root_path)
 
     # metrics
     eva = {
@@ -97,15 +104,24 @@ def main(args):
             constra_loss_record.update(constra_loss.data, n)
             adv_loss_record.update(adv_loss.data, n)
             loss_record.update(loss_all.data, n)
-
+            writer.add_scalar('training_binary_loss_by_iteration', binary_loss.data, i)
+            writer.add_scalar('training_adv_loss_by_iteration', adv_loss.data, i)
+            writer.add_scalar('training_constra_loss_by_iteration', constra_loss.data, i)
+            writer.add_scalar('training_total_loss_by_iteration', loss_all.data, i)
             model.zero_grad()
             loss_all.backward()
             optimizer.step()
             lr = optimizer.param_groups[0]['lr']
             # st = time.time()
+            # writer.add_scalar('training_loss_by_iteration_bw', loss_all.data, i)
 
-            if i % args.print_freq == args.print_freq - 1:
-                print("epoch:{:d}, mini-batch:{:d}, lr={:.4f}, binary_loss={:.4f}, constra_loss={:.4f}, adv_loss={:.4f}, Loss={:.4f}".format(epoch + 1, i + 1, lr, binary_loss_record.avg, constra_loss_record.avg, adv_loss_record.avg, loss_record.avg))
+        if i % args.print_freq == args.print_freq - 1:
+            print("epoch:{:d}, mini-batch:{:d}, lr={:.4f}, binary_loss={:.4f}, constra_loss={:.4f}, adv_loss={:.4f}, Loss={:.4f}".format(epoch + 1, i + 1, lr, binary_loss_record.avg, constra_loss_record.avg, adv_loss_record.avg, loss_record.avg))
+        
+        writer.add_scalar('training_binary_loss_by_epoch', binary_loss_record.avg, epoch)
+        writer.add_scalar('training_constra_loss_by_epoch', constra_loss_record.avg, epoch)
+        writer.add_scalar('training_adv_loss_by_epoch', adv_loss_record.avg, epoch)
+        writer.add_scalar('training_loss_by_epoch', loss_record.avg, epoch)
         
         # whole epoch average
         print("epoch:{:d}, Train: lr={:f}, Loss={:.4f}".format(epoch + 1, lr, loss_record.avg))
@@ -124,7 +140,7 @@ def main(args):
                 print("[{}/{}]Testing {}...".format(i+1, len(test_data_dic), test_name))
                 test_set = test_data_dic[test_name]
                 test_loader = DataLoader(test_set, batch_size=args.batch_size, shuffle=True, num_workers=num_workers)
-                HTER, auc_test = test(model, args, test_loader, score_path, epoch, name=test_name)
+                HTER, auc_test = test(model, args, test_loader, score_path, epoch, writer, name=test_name)
                 if auc_test-HTER>=eva["best_auc"]-eva["best_HTER"]:
                     eva["best_auc"] = auc_test
                     eva["best_HTER"] = HTER
@@ -149,24 +165,17 @@ def main(args):
             }, model_path)
             print("Model saved to {}".format(model_path))
 
+    # Close the TensorBoard writer
+    writer.close()
 
-def test(model, args, test_loader, score_root_path, epoch, name=""):
+
+def test(model, args, test_loader, score_root_path, epoch, writer, name=""):
     model.eval()
     with torch.no_grad():
         start_time = time.time()
         scores = []
         for i, sample_batched in enumerate(test_loader):
             image_x, label, map_x = sample_batched["image_x"].cuda(), sample_batched["label"].cuda(), sample_batched["map_x"].cuda()
-            # map_score = 0
-            # for frame_i in range(image_x.shape[1]):
-            #     if args.model_type in ["SSAN_R"]:
-            #         cls_x1_x1, fea_x1_x1, fea_x1_x2, _ = model(image_x[:,frame_i,:,:,:], image_x[:,frame_i,:,:,:])
-            #         score_norm = torch.softmax(cls_x1_x1, dim=1)[:, 1]
-            #     elif args.model_type in ["SSAN_M"]:
-            #         pred_map, fea_x1_x1, fea_x1_x2, _ = model(image_x[:,frame_i,:,:,:], image_x[:,frame_i,:,:,:])
-            #         score_norm = torch.sum(pred_map, dim=(1, 2))/(args.map_size*args.map_size)
-            #     map_score += score_norm
-            # map_score = map_score/image_x.shape[1]
 
             if args.model_type in ["SSAN_R"]:                                                   
                 cls_x1_x1, fea_x1_x1, fea_x1_x2, _ = model(image_x, image_x)
@@ -189,6 +198,11 @@ def test(model, args, test_loader, score_root_path, epoch, name=""):
         print("## {} score:".format(name))
         print("epoch:{:d}, test:  val_ACC={:.4f}, HTER={:.4f}, AUC={:.4f}, val_err={:.4f}, ACC={:.4f}".format(epoch+1, test_ACC, HTER, auc_test, test_err, test_ACC))
         print("test phase cost {:.4f}s".format(time.time()-start_time))
+        writer.add_scalar('validation_acc_by_epoch', test_ACC, epoch)
+        writer.add_scalar('validation_hter_by_epoch', HTER, epoch)
+        writer.add_scalar('validation_frr_by_epoch', FRR, epoch)
+        writer.add_scalar('validation_frr_by_epoch', fpr, epoch)
+        writer.add_scalar('validation_test_err_by_epoch', test_err, epoch)
     return HTER, auc_test
 
     
