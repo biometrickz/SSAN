@@ -12,11 +12,11 @@ class Normaliztion(object):
     """
     def __call__(self, sample):
         image_x = sample['image_x']
-        map_x = sample['map_x']
+        # map_x = sample['map_x']
         image_x = (image_x - 127.5)/128     # [-1,1]
         sample['image_x'] = image_x
-        new_map_x = map_x/255.0
-        sample['map_x'] = new_map_x
+        # new_map_x = map_x/255.0
+        # sample['map_x'] = new_map_x
         return sample
 
 
@@ -37,9 +37,9 @@ class Normaliztion_ImageNet(object):
         image_x = sample['image_x']/255
         image_x = self.trans(image_x)
         sample['image_x'] = image_x
-        map_x = sample['map_x']
-        new_map_x = map_x/255.0
-        sample['map_x'] = new_map_x
+        # map_x = sample['map_x']
+        # new_map_x = map_x/255.0
+        # sample['map_x'] = new_map_x
         return sample
 
     
@@ -49,17 +49,19 @@ class ToTensor(object):
         process only one batch every time
     """
     def __call__(self, sample):
-        image_x, map_x, spoofing_label = sample['image_x'], sample['map_x'], sample['label']
+        # image_x, map_x, spoofing_label = sample['image_x'], sample['map_x'], sample['label']
+        image_x, spoofing_label = sample['image_x'], sample['label']
+
         # swap color, bgr to rgb axis because
         # numpy image: (batch_size) x H x W x C
         # torch image: (batch_size) x C X H X W
         image_x = image_x[:,:,::-1].transpose((2, 0, 1))
         image_x = np.array(image_x)
-        map_x = np.array(map_x)
+        # map_x = np.array(map_x)
         spoofing_label_np = np.array([0],dtype=np.long)
         spoofing_label_np[0] = spoofing_label
         sample['image_x'] = torch.from_numpy(image_x.astype(np.float)).float()
-        sample['map_x'] = torch.from_numpy(map_x.astype(np.float)).float()
+        # sample['map_x'] = torch.from_numpy(map_x.astype(np.float)).float()
         sample['label'] = torch.from_numpy(spoofing_label_np.astype(np.long)).long()
         return sample
 
@@ -93,11 +95,11 @@ class RandomHorizontalFlip(object):
     def __call__(self, sample):
         if random_float(0.0, 1.0) < 0.5:
             image_x = sample["image_x"]
-            map_x = sample["map_x"]
+            # map_x = sample["map_x"]
             image_x = cv2.flip(image_x, 1)
-            map_x = cv2.flip(map_x, 1)
+            # map_x = cv2.flip(map_x, 1)
             sample["image_x"] = image_x
-            sample["map_x"] = map_x
+            # sample["map_x"] = map_x
         return sample
 
 

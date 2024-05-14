@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import os
 from networks import get_model
-from datasets import data_merge
+from datasets import data_merge, data_merge_R
 from optimizers import get_optimizer
 from torch.utils.data import Dataset, DataLoader
 from transformers import *
@@ -23,9 +23,13 @@ random.seed(16)
 
 def main(args):
     # st = time.time()
-    data_bank = data_merge(args.data_dir, args.train_size, args.val_size)
+    # data_bank = data_merge(args.data_dir)
+    data_bank = data_merge_R.data_merge(args.data_dir)
+
     # define train loader
-    train_set = data_bank.get_datasets(type='train', protocol=args.protocol, img_size=args.img_size, map_size=args.map_size, transform=transformer_train_pure(), debug_subset_size=args.debug_subset_size)
+    # train_set = data_bank.get_datasets(type='train', protocol=args.protocol, img_size=args.img_size, map_size=args.map_size, transform=transformer_train_pure(), debug_subset_size=args.debug_subset_size)
+    train_set = data_bank.get_datasets(type='train', protocol=args.protocol, img_size=args.img_size, transform=transformer_train_pure(), debug_subset_size=args.debug_subset_size)
+
     num_workers = 16
     train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True, num_workers=num_workers)
     print("Number of worker threads:", num_workers)
@@ -114,8 +118,8 @@ def main(args):
             # st = time.time()
             # writer.add_scalar('training_loss_by_iteration_bw', loss_all.data, i)
 
-        if i % args.print_freq == args.print_freq - 1:
-            print("epoch:{:d}, mini-batch:{:d}, lr={:.4f}, binary_loss={:.4f}, constra_loss={:.4f}, adv_loss={:.4f}, Loss={:.4f}".format(epoch + 1, i + 1, lr, binary_loss_record.avg, constra_loss_record.avg, adv_loss_record.avg, loss_record.avg))
+            if i % args.print_freq == args.print_freq - 1:
+                print("epoch:{:d}, mini-batch:{:d}, lr={:.4f}, binary_loss={:.4f}, constra_loss={:.4f}, adv_loss={:.4f}, Loss={:.4f}".format(epoch + 1, i + 1, lr, binary_loss_record.avg, constra_loss_record.avg, adv_loss_record.avg, loss_record.avg))
         
         writer.add_scalar('training_binary_loss_by_epoch', binary_loss_record.avg, epoch)
         writer.add_scalar('training_constra_loss_by_epoch', constra_loss_record.avg, epoch)
@@ -185,12 +189,11 @@ def test(model, args, test_loader, score_root_path, epoch, writer, name=""):
             for ii in range(image_x.shape[0]):
                 scores.append("{} {}\n".format(score_norm[ii], label[ii][0]))
                        
-        map_score_val_filename = os.path.join(score_root_path, "{}_score.txt".format(name))
+        map_score_val_filename = os.path.join(score_root_path, "{}_score.txt".format('patchnet'))
         print("score: write test scores to {}".format(map_score_val_filename))
         with open(map_score_val_filename, 'w') as file:
             file.writelines(scores)
 
-        # test_ACC, fpr, FRR, HTER, auc_test, test_err = performances_val2(scores, labels)
         test_ACC, fpr, FRR, HTER, auc_test, test_err = performances_val(map_score_val_filename)
 
         print("## {} score:".format(name))

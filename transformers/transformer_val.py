@@ -14,7 +14,7 @@ class Normaliztion_val_video(object):
         image_x = sample['image_x']
         image_x = (image_x - 127.5)/128     # [-1,1]
         sample['image_x'] = image_x
-        sample['map_x'] = sample['map_x']/255.0
+        # sample['map_x'] = sample['map_x']/255.0
         return sample
 
 
@@ -54,7 +54,7 @@ class ToTensor_val_video(object):
         spoofing_label_np = np.array([0],dtype=np.long)
         spoofing_label_np[0] = spoofing_label
         sample['image_x'] = torch.from_numpy(image_x.astype(np.float)).float()
-        sample['map_x'] = torch.from_numpy(val_map_x.astype(np.float)).float()
+        # sample['map_x'] = torch.from_numpy(val_map_x.astype(np.float)).float()
         sample['label'] = torch.from_numpy(spoofing_label_np.astype(np.long)).long()
         return sample
 

@@ -1,7 +1,6 @@
 import os
 import torch
-# from .Load_Custom import Spoofing_TrainVal
-from .Load_CSV import Spoofing_TrainVal, Spoofing_Test
+from .Load_CSV_R import Spoofing_TrainVal, Spoofing_Test
 
 class dataset_info(object):
 
@@ -16,17 +15,16 @@ class data_merge(object):
         self.datasets = ["PATCHNET"]
         self.image_dir = image_dir
         PATCHNET = dataset_info()
-        PATCHNET.root_dir = os.path.join(self.image_dir, "PATCHNET_DATASET")
+        PATCHNET.root_dir = os.path.join(self.image_dir, "patchnet")
         self.dic["PATCHNET"] = PATCHNET
 
-    def get_single_dataset(self, data_name="", type='train', img_size=256, map_size=32, transform=None, debug_subset_size=None, UUID=-1):
-        depth_dir = os.path.join(self.image_dir, 'PATCHNET_DEPTH')
-        train_csv = os.path.join(self.dic["PATCHNET"].root_dir, 'train', 'train.csv')
-        val_csv = os.path.join(self.dic["PATCHNET"].root_dir, 'val', 'val.csv')
-        test_csv = os.path.join(self.dic["PATCHNET"].root_dir, 'test', 'test.csv')
+    def get_single_dataset(self, data_name="", type='train', img_size=256, transform=None, debug_subset_size=None, UUID=-1):
+        train_csv = os.path.join(self.dic["PATCHNET"].root_dir, 'train', 'train_list.csv')
+        val_csv = os.path.join(self.dic["PATCHNET"].root_dir, 'val', 'val_list.csv')
+        test_csv = os.path.join(self.dic["PATCHNET"].root_dir, 'test', 'test_list.csv')
         if type == 'train':
             if data_name in self.datasets:
-                data_set = Spoofing_TrainVal(train_csv, depth_dir, transform=transform, img_size=img_size, map_size=map_size, UUID=UUID)
+                data_set = Spoofing_TrainVal(train_csv, transform=transform, img_size=img_size, UUID=UUID)
             else:
                 print("NO DATASET Found")
                 exit()    
@@ -35,7 +33,7 @@ class data_merge(object):
         elif type == 'val':
             if data_name in self.datasets:
                 print("HEY", data_name)
-                data_set = Spoofing_TrainVal(val_csv, depth_dir, transform=transform, img_size=img_size, map_size=map_size, UUID=UUID)
+                data_set = Spoofing_TrainVal(val_csv, transform=transform, img_size=img_size, UUID=UUID)
             else:
                 print("NO DATASET Found")
                 exit() 
@@ -65,9 +63,9 @@ class data_merge(object):
         data_set_sum = None
 
         if type == 'train':
-            data_set_sum = self.get_single_dataset(data_name=data_name_list_train[0], type=type, img_size=img_size, map_size=map_size, transform=transform, debug_subset_size=debug_subset_size, UUID=0)
+            data_set_sum = self.get_single_dataset(data_name=data_name_list_train[0], type=type, img_size=img_size,  transform=transform, debug_subset_size=debug_subset_size, UUID=0)
         elif type == 'val':
-            data_set_sum = self.get_single_dataset(data_name=data_name_list_val[0], type=type, img_size=img_size, map_size=map_size, transform=transform, debug_subset_size=debug_subset_size, UUID=0)
+            data_set_sum = self.get_single_dataset(data_name=data_name_list_val[0], type=type, img_size=img_size, transform=transform, debug_subset_size=debug_subset_size, UUID=0)
         elif type == 'test':
             data_set_sum = self.get_single_dataset(data_name=data_name_list_test[0], type=type, img_size=img_size, transform=transform, debug_subset_size=debug_subset_size, UUID=0)
 

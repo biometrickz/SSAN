@@ -1,4 +1,4 @@
-from .performance import performances_val, performances_val2
+from .performance import performances_val
 import os
 import torch.nn.functional as F
 import numpy as np
