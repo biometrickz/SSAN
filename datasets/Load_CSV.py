@@ -7,10 +7,10 @@ from utils import *
 from glob import glob
 
 
-class Spoofing_custom(Dataset):
+class Spoofing_TrainVal(Dataset):
     
-    def __init__(self, info_list, depth_dir, transform=None, img_size=256, map_size=32, UUID=-1, size=100):
-        self.labels = pd.read_csv(info_list, delimiter=",", header=None).drop([0], axis=0)[:size]
+    def __init__(self, info_list, depth_dir, transform=None, img_size=256, map_size=32, UUID=-1):
+        self.labels = pd.read_csv(info_list, delimiter=",", header=None).drop([0], axis=0)
         self.map_root_dir = depth_dir
         self.transform = transform
         self.img_size = img_size
@@ -53,3 +53,30 @@ class Spoofing_custom(Dataset):
                 print(map_name)
 
         return image_x, map_x
+
+class Spoofing_Test(Dataset):
+    
+    def __init__(self, info_list, transform=None, img_size=256, UUID=-1):
+        self.labels = pd.read_csv(info_list, delimiter=",", header=None).drop([0], axis=0)
+        self.transform = transform
+        self.img_size = img_size
+        self.UUID = UUID
+
+    def __len__(self):
+        return len(self.labels)
+    
+    def __getitem__(self, idx):
+        image_path =  str(self.labels.iloc[idx, 0])
+        spoofing_label = int(float(self.labels.iloc[idx, 1]))
+        try:
+            image_x_temp = cv2.imread(image_path)
+            image_x = cv2.resize(image_x_temp, (self.img_size, self.img_size))
+            sample = {'image_x': image_x, 'label': spoofing_label, "UUID": self.UUID}
+            if self.transform:
+                sample = self.transform(sample)
+            
+            return sample
+        except Exception as e:
+            print(self.labels.iloc[idx, 1])
+            print(f"Warning: Could not read image at {image_path}. Skipping this image. Error: {e}")
+            return self.__getitem__((idx + 1) % len(self.labels))

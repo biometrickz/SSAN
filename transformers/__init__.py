@@ -1,2 +1,3 @@
 from .transformer_train import transformer_train, transformer_train_ImageNet, transformer_train_pure
-from .transformer_test import transformer_test_video, transformer_test_video_ImageNet, transformer_custom
+from .transformer_val import transformer_val_video, transformer_val_video_ImageNet, transformer_valcustom
+from .transformer_test import transformer_test_video, transformer_test_video_ImageNet, transformer_testcustom

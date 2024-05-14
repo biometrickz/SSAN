@@ -14,7 +14,6 @@ class Normaliztion_valtest_video(object):
         image_x = sample['image_x']
         image_x = (image_x - 127.5)/128     # [-1,1]
         sample['image_x'] = image_x
-        sample['map_x'] = sample['map_x']/255.0
         return sample
 
 
@@ -36,35 +35,31 @@ class Normaliztion_valtest_video_ImageNet(object):
         sample['image_x'] = image_x
         return sample
 
-
-class ToTensor_valtest_video(object):
+class ToTensor_test_video(object):
     """
         Convert ndarrays in sample to Tensors.
         process only one batch every time
     """
     def __call__(self, sample):
-        image_x, val_map_x, spoofing_label = sample['image_x'], sample['map_x'], sample['label']
+        image_x, spoofing_label = sample['image_x'], sample['label']
         # swap color axis because    BGR2RGB
         # numpy image: (batch_size) x T x H x W x C
         # torch image: (batch_size) x T x C X H X W
         # image_x = image_x[:,:,:,::-1].transpose((0, 3, 1, 2))
         image_x = image_x[:,:,::-1].transpose((2, 0, 1))
         image_x = np.array(image_x)
-        val_map_x = np.array(val_map_x)
         spoofing_label_np = np.array([0],dtype=np.long)
         spoofing_label_np[0] = spoofing_label
         sample['image_x'] = torch.from_numpy(image_x.astype(np.float)).float()
-        sample['map_x'] = torch.from_numpy(val_map_x.astype(np.float)).float()
         sample['label'] = torch.from_numpy(spoofing_label_np.astype(np.long)).long()
         return sample
 
-
 def transformer_test_video():
-    return transforms.Compose([Normaliztion_valtest_video(), ToTensor_valtest_video()])
+    return transforms.Compose([Normaliztion_valtest_video(), ToTensor_test_video()])
 
 # use ImageNet mean and var for normalization
 def transformer_test_video_ImageNet():
-    return transforms.Compose([ToTensor_valtest_video(), Normaliztion_valtest_video_ImageNet()])
+    return transforms.Compose([ToTensor_test_video(), Normaliztion_valtest_video_ImageNet()])
 
-def transformer_custom():
-    return transforms.Compose([ToTensor_valtest_video(), Normaliztion_valtest_video()])
+def transformer_testcustom():
+    return transforms.Compose([ToTensor_test_video(), Normaliztion_valtest_video()])

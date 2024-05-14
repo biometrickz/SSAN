@@ -7,7 +7,7 @@ from utils import *
 from glob import glob
 
 
-class Spoofing_custom(Dataset):
+class Spoofing_TrainVal(Dataset):
     
     def __init__(self, info_list, root_dir,  depth_dir, transform=None, img_size=256, map_size=32, UUID=-1, size=100):
         self.labels = pd.read_csv(info_list, delimiter=",", header=None).drop([0], axis=0)[:size]

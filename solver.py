@@ -22,11 +22,10 @@ random.seed(16)
 # print(torch.cuda.version())
 
 def main(args):
-    st = time.time()
-    data_bank = data_merge(args.data_dir, train_size=1000000, val_size=40000)
+    # st = time.time()
+    data_bank = data_merge(args.data_dir, args.train_size, args.val_size)
     # define train loader
-    train_set = data_bank.get_datasets(train=True, protocol=args.protocol, img_size=args.img_size, map_size=args.map_size, transform=transformer_train_pure(), debug_subset_size=args.debug_subset_size)
-
+    train_set = data_bank.get_datasets(type='train', protocol=args.protocol, img_size=args.img_size, map_size=args.map_size, transform=transformer_train_pure(), debug_subset_size=args.debug_subset_size)
     num_workers = 16
     train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True, num_workers=num_workers)
     print("Number of worker threads:", num_workers)
@@ -132,29 +131,28 @@ def main(args):
         # test
         epoch_test = 1
         if epoch % epoch_test == epoch_test-1:
-            test_data_dic = data_bank.get_datasets(train=False, protocol=args.protocol, img_size=args.img_size, transform=transformer_test_video(), debug_subset_size=args.debug_subset_size)
-
+            test_data_dic = data_bank.get_datasets(type='val', protocol=args.protocol, img_size=args.img_size, transform=transformer_test_video(), debug_subset_size=args.debug_subset_size)
             score_path = os.path.join(score_root_path, "epoch_{}".format(epoch+1))
             check_folder(score_path)
-            for i, test_name in enumerate(test_data_dic.keys()):
-                print("[{}/{}]Testing {}...".format(i+1, len(test_data_dic), test_name))
-                test_set = test_data_dic[test_name]
-                test_loader = DataLoader(test_set, batch_size=args.batch_size, shuffle=True, num_workers=num_workers)
-                HTER, auc_test = test(model, args, test_loader, score_path, epoch, writer, name=test_name)
-                if auc_test-HTER>=eva["best_auc"]-eva["best_HTER"]:
-                    eva["best_auc"] = auc_test
-                    eva["best_HTER"] = HTER
-                    eva["best_epoch"] = epoch+1
-                    model_path = os.path.join(model_root_path, "{}_p{}_best.pth".format(args.model_type, args.protocol))
-                    torch.save({
-                        'epoch': epoch+1,
-                        'state_dict':model.module.state_dict(),
-                        'optimizer':optimizer.state_dict(),
-                        'scheduler':scheduler,
-                        'args':args,
-                    }, model_path)
-                    print("Model saved to {}".format(model_path))
-                print("[Best result] epoch:{}, HTER={:.4f}, AUC={:.4f}".format(eva["best_epoch"],  eva["best_HTER"], eva["best_auc"]))
+            # for i, test_name in enumerate(test_data_dic.keys()):
+                # print("[{}/{}]Testing {}...".format(i+1, len(test_data_dic), test_name))
+                # test_set = test_data_dic[test_name]
+            test_loader = DataLoader(test_data_dic, batch_size=args.batch_size, shuffle=True, num_workers=num_workers)
+            HTER, auc_test = test(model, args, test_loader, score_path, epoch, writer, name=test_data_dic)
+            if auc_test-HTER>=eva["best_auc"]-eva["best_HTER"]:
+                eva["best_auc"] = auc_test
+                eva["best_HTER"] = HTER
+                eva["best_epoch"] = epoch+1
+                model_path = os.path.join(model_root_path, "{}_p{}_best.pth".format(args.model_type, args.protocol))
+                torch.save({
+                    'epoch': epoch+1,
+                    'state_dict':model.module.state_dict(),
+                    'optimizer':optimizer.state_dict(),
+                    'scheduler':scheduler,
+                    'args':args,
+                }, model_path)
+                print("Model saved to {}".format(model_path))
+            print("[Best result] epoch:{}, HTER={:.4f}, AUC={:.4f}".format(eva["best_epoch"],  eva["best_HTER"], eva["best_auc"]))
             model_path = os.path.join(model_root_path, "{}_p{}_recent.pth".format(args.model_type, args.protocol))
             torch.save({
                 'epoch': epoch+1,
@@ -175,7 +173,7 @@ def test(model, args, test_loader, score_root_path, epoch, writer, name=""):
         start_time = time.time()
         scores = []
         for i, sample_batched in enumerate(test_loader):
-            image_x, label, map_x = sample_batched["image_x"].cuda(), sample_batched["label"].cuda(), sample_batched["map_x"].cuda()
+            image_x, label = sample_batched["image_x"].cuda(), sample_batched["label"].cuda()
 
             if args.model_type in ["SSAN_R"]:                                                   
                 cls_x1_x1, fea_x1_x1, fea_x1_x2, _ = model(image_x, image_x)
