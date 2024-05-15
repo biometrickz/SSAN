@@ -54,8 +54,8 @@ class Spoofing_Test(Dataset):
         return len(self.labels)
     
     def __getitem__(self, idx):
-        image_path =  str(self.labels.iloc[idx, 0])
-        spoofing_label = int(float(self.labels.iloc[idx, 1]))
+        image_path =  str(self.labels.iloc[idx, 1])
+        spoofing_label = int(float(self.labels.iloc[idx, 0]))
         try:
             image_x_temp = cv2.imread(image_path)
             image_x = cv2.resize(image_x_temp, (self.img_size, self.img_size))
