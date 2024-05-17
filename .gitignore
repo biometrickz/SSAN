@@ -1,5 +1,6 @@
 # my ignore
 results/
+data/
 *.sh
 demo.py
 
