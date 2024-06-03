@@ -21,12 +21,17 @@ class data_merge(object):
 # train_list - woxcsmad
 # train_list2 - wxcsmad
 # train_list3 - wolivexcsmad
-# train_list - woxcsmad but w sil youtube
+# train_list4 - woxcsmad but w sil youtube(all added only to train train)
+# train_list5 - woxcsmad but w sil youtube
+# train_list6 - wxcsmad w sil youtube
+# train_list7 - woxcsmad but w sil youtube, min_shape >= 112
+
+
 
     def get_single_dataset(self, data_name="", type='train', img_size=256, transform=None, debug_subset_size=None, UUID=-1):
-        train_csv = os.path.join(self.dic["PATCHNET"].root_dir, 'train', 'train_list4.csv')
-        val_csv = os.path.join(self.dic["PATCHNET"].root_dir, 'val', 'val_list.csv')
-        test_csv = os.path.join(self.dic["PATCHNET"].root_dir, 'test', 'test_list.csv')
+        train_csv = os.path.join(self.dic["PATCHNET"].root_dir, 'train', 'train_list7.csv')
+        val_csv = os.path.join(self.dic["PATCHNET"].root_dir, 'val', 'val_list7.csv')
+        test_csv = os.path.join(self.dic["PATCHNET"].root_dir, 'test', 'test_list7.csv')
         if type == 'train':
             if data_name in self.datasets:
                 data_set = Spoofing_TrainVal(train_csv, transform=transform, img_size=img_size, UUID=UUID)

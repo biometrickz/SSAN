@@ -138,9 +138,6 @@ def main(args):
             test_data_dic = data_bank.get_datasets(type='val', protocol=args.protocol, img_size=args.img_size, transform=transformer_test_video(), debug_subset_size=args.debug_subset_size)
             score_path = os.path.join(score_root_path, "epoch_{}".format(epoch+1))
             check_folder(score_path)
-            # for i, test_name in enumerate(test_data_dic.keys()):
-                # print("[{}/{}]Testing {}...".format(i+1, len(test_data_dic), test_name))
-                # test_set = test_data_dic[test_name]
             test_loader = DataLoader(test_data_dic, batch_size=args.batch_size, shuffle=True, num_workers=num_workers)
             HTER, auc_test = test(model, args, test_loader, score_path, epoch, writer, name=test_data_dic)
             if auc_test-HTER>=eva["best_auc"]-eva["best_HTER"]:
