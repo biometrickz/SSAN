@@ -1,0 +1,21 @@
+services:
+
+  ssan:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    volumes:
+       - /mnt/8TB/ml_projects_yeldar/:/app/data_dir:rw
+      #  - ./src:/workspace:rw
+      #  - ./test_faces:/workspace/test_faces:rw
+      #  - /home/user/ml_projects/Yeldar/data/SiWMv2_processed/live:/workspace/SiWMv2_processed/live:rw
+    restart: on-failure
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
+
+    shm_size: '8gb'

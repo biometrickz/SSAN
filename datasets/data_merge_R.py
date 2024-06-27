@@ -25,13 +25,16 @@ class data_merge(object):
 # train_list5 - woxcsmad but w sil youtube
 # train_list6 - wxcsmad w sil youtube
 # train_list7 - woxcsmad but w sil youtube, min_shape >= 112
-
+# train_list8 - woxcsmad, wo sil youtube, w siwmv2  Done
+# train_list9 - woxcsmad, w sil youtube, w siwmv2
+# train_list10 - woxcsmad, w sil youtube, w siwmv2 - added more live, mainly D3 on which there were bad results (added to train only)
+# train_list11 - same as train_list10 but with different path to be convenient for docker 
 
 
     def get_single_dataset(self, data_name="", type='train', img_size=256, transform=None, debug_subset_size=None, UUID=-1):
-        train_csv = os.path.join(self.dic["PATCHNET"].root_dir, 'train', 'train_list7.csv')
-        val_csv = os.path.join(self.dic["PATCHNET"].root_dir, 'val', 'val_list7.csv')
-        test_csv = os.path.join(self.dic["PATCHNET"].root_dir, 'test', 'test_list7.csv')
+        train_csv = os.path.join(self.dic["PATCHNET"].root_dir, 'train', 'train_list11.csv')
+        val_csv = os.path.join(self.dic["PATCHNET"].root_dir, 'val', 'val_list11.csv')
+        test_csv = os.path.join(self.dic["PATCHNET"].root_dir, 'test', 'test_list.csv')
         if type == 'train':
             if data_name in self.datasets:
                 data_set = Spoofing_TrainVal(train_csv, transform=transform, img_size=img_size, UUID=UUID)
