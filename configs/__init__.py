@@ -4,7 +4,7 @@ import argparse
 def parse_args():
     parser = argparse.ArgumentParser()
     # build dirs
-    parser.add_argument('--data_dir', type=str, default="/home/user/ml_projects/Yeldar/Custom", help='all_data_dir')
+    # parser.add_argument('--data_dir', type=str, default="/home/user/ml_projects/Yeldar/Custom", help='all_data_dir')
     parser.add_argument('--result_path', type=str, default='./results', help='root result directory')
     parser.add_argument('--result_name', type=str, default='PatchNet', help='result directory')
     # training settings

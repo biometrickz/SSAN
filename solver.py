@@ -24,11 +24,11 @@ random.seed(16)
 def main(args):
     # st = time.time()
     # data_bank = data_merge(args.data_dir)
-    data_bank = data_merge_R.data_merge(args.data_dir)
+    data_bank = data_merge_R.data_merge()
 
     # define train loader
-    # train_set = data_bank.get_datasets(type='train', protocol=args.protocol, img_size=args.img_size, map_size=args.map_size, transform=transformer_train_pure(), debug_subset_size=args.debug_subset_size)
-    train_set = data_bank.get_datasets(type='train', protocol=args.protocol, img_size=args.img_size, transform=transformer_train_pure(), debug_subset_size=args.debug_subset_size)
+    # train_set = data_bank.get_datasets(type='train', img_size=args.img_size, map_size=args.map_size, transform=transformer_train_pure(), debug_subset_size=args.debug_subset_size)
+    train_set = data_bank.get_datasets(type='train', img_size=args.img_size, transform=transformer_train_pure(), debug_subset_size=args.debug_subset_size)
 
     num_workers = 16
     train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True, num_workers=num_workers)
@@ -135,7 +135,7 @@ def main(args):
         # test
         epoch_test = 1
         if epoch % epoch_test == epoch_test-1:
-            test_data_dic = data_bank.get_datasets(type='val', protocol=args.protocol, img_size=args.img_size, transform=transformer_test_video(), debug_subset_size=args.debug_subset_size)
+            test_data_dic = data_bank.get_datasets(type='val', img_size=args.img_size, transform=transformer_test_video(), debug_subset_size=args.debug_subset_size)
             score_path = os.path.join(score_root_path, "epoch_{}".format(epoch+1))
             check_folder(score_path)
             test_loader = DataLoader(test_data_dic, batch_size=args.batch_size, shuffle=True, num_workers=num_workers)
@@ -144,7 +144,7 @@ def main(args):
                 eva["best_auc"] = auc_test
                 eva["best_HTER"] = HTER
                 eva["best_epoch"] = epoch+1
-                model_path = os.path.join(model_root_path, "{}_p{}_best.pth".format(args.model_type, args.protocol))
+                model_path = os.path.join(model_root_path, "{}_best.pth".format(args.model_type))
                 torch.save({
                     'epoch': epoch+1,
                     'state_dict':model.module.state_dict(),
@@ -154,7 +154,7 @@ def main(args):
                 }, model_path)
                 print("Model saved to {}".format(model_path))
             print("[Best result] epoch:{}, HTER={:.4f}, AUC={:.4f}".format(eva["best_epoch"],  eva["best_HTER"], eva["best_auc"]))
-            model_path = os.path.join(model_root_path, "{}_p{}_recent.pth".format(args.model_type, args.protocol))
+            model_path = os.path.join(model_root_path, "{}_recent.pth".format(args.model_type))
             torch.save({
                 'epoch': epoch+1,
                 'state_dict':model.module.state_dict(),
