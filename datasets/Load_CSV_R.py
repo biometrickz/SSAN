@@ -54,8 +54,8 @@ class Spoofing_Test(Dataset):
         return len(self.labels)
     
     def __getitem__(self, idx):
-        image_path =  str(self.labels.iloc[idx, 0])
-        spoofing_label = int(float(self.labels.iloc[idx, 1]))
+        image_path =  str(self.labels.iloc[idx, 1])
+        spoofing_label = int(float(self.labels.iloc[idx, 0]))
         try:
             image_x_temp = cv2.imread(image_path)
             image_x = cv2.resize(image_x_temp, (self.img_size, self.img_size))
@@ -65,6 +65,6 @@ class Spoofing_Test(Dataset):
             
             return sample
         except Exception as e:
-            print(self.labels.iloc[idx, 0])
+            print(self.labels.iloc[idx, 1])
             print(f"Warning: Could not read image at {image_path}. Skipping this image. Error: {e}")
             return self.__getitem__((idx + 1) % len(self.labels))

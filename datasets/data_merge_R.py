@@ -13,17 +13,18 @@ class data_merge(object):
     def __init__(self):
         pass
 
-# train_list - woxcsmad
-# train_list2 - wxcsmad
-# train_list3 - wolivexcsmad
-# train_list4 - woxcsmad but w sil youtube(all added only to train train)
-# train_list5 - woxcsmad but w sil youtube
-# train_list6 - wxcsmad w sil youtube
-# train_list7 - woxcsmad but w sil youtube, min_shape >= 112
-# train_list8 - woxcsmad, wo sil youtube, w siwmv2  Done
-# train_list9 - woxcsmad, w sil youtube, w siwmv2
-# train_list10 - woxcsmad, w sil youtube, w siwmv2 - added more live, mainly D3 on which there were bad results (added to train only)
+# train_list - M1
+# train_list2 - M1+M2
+# train_list3 - M1+(M2w/o live)
+# train_list4 - M1+M3 (all added only to train train)
+# train_list5 - M1+M3
+# train_list6 - M1+M2+M3
+# train_list7 - M1+M3, min_shape >= 112
+# train_list8 - M1+M4
+# train_list9 - M1+M3+M4
+# train_list10 - M1+M3+M4 - added more live, mainly D3 on which there were bad results (added to train only)
 # train_list11 - same as train_list10 but with different path to be convenient for docker 
+# train_list12 = 10% train_list11 
 
 
     def get_single_dataset(self, type='train', img_size=256, transform=None, debug_subset_size=None, UUID=-1):
@@ -62,7 +63,7 @@ class data_merge(object):
         print("Loading dataset, number: {}".format(len(data_set)))
         return data_set
 
-    def get_datasets(self, type='train', protocol="Patchnet", img_size=256, map_size=32, transform=None, debug_subset_size=None):
+    def get_datasets(self, type='train', img_size=256, map_size=32, transform=None, debug_subset_size=None):
         
         data_set_sum = None
         if type == 'train':

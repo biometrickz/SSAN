@@ -6,13 +6,13 @@ def parse_args():
     # build dirs
     # parser.add_argument('--data_dir', type=str, default="/home/user/ml_projects/Yeldar/Custom", help='all_data_dir')
     parser.add_argument('--result_path', type=str, default='./results', help='root result directory')
-    parser.add_argument('--result_name', type=str, default='PatchNet', help='result directory')
+    parser.add_argument('--result_name', type=str, default='Experiment', help='result directory')
     # training settings
     parser.add_argument('--model_type', type=str, default="SSAN_M", help='model_type')
     parser.add_argument('--batch_size', type=int, default=16, help='batch size') # authors have batch_size=16 
     parser.add_argument('--img_size', type=int, default=256, help='img size')
     parser.add_argument('--map_size', type=int, default=32, help='depth map size')
-    parser.add_argument('--protocol', type=str, default="Custom", help='protocal')
+    # parser.add_argument('--protocol', type=str, default="Custom", help='protocal')
     parser.add_argument('--device', type=str, default='0,1', help='device id, format is like 0,1,2')
     parser.add_argument('--base_lr', type=float, default=0.0001, help='base learning rate')
     parser.add_argument('--start_epoch', type=int, default=0, help='start epoch')

@@ -65,6 +65,16 @@ class ToTensor(object):
         sample['label'] = torch.from_numpy(spoofing_label_np.astype(np.long)).long()
         return sample
 
+class RGB2BGR(object):
+    """
+    Convert an image from RGB to BGR format.
+    """
+    def __call__(self, sample):
+        image_x = sample['image_x']
+        image_x = image_x[..., ::-1]  # Swap the RGB to BGR
+        sample['image_x'] = image_x
+        return sample
+
 
 class Cutout(object):
 

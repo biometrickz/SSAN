@@ -186,7 +186,7 @@ def test(model, args, test_loader, score_root_path, epoch, writer, name=""):
             for ii in range(image_x.shape[0]):
                 scores.append("{} {}\n".format(score_norm[ii], label[ii][0]))
                        
-        map_score_val_filename = os.path.join(score_root_path, "{}_score.txt".format('patchnet'))
+        map_score_val_filename = os.path.join(score_root_path, "score.txt")
         print("score: write test scores to {}".format(map_score_val_filename))
         with open(map_score_val_filename, 'w') as file:
             file.writelines(scores)
