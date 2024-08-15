@@ -14,6 +14,7 @@ class data_merge(object):
         pass
 
 # train_list - M1
+# train_list1 - same as train_list but with different path to be convenient for docker 
 # train_list2 - M1+M2
 # train_list3 - M1+(M2w/o live)
 # train_list4 - M1+M3 (all added only to train train)
@@ -31,9 +32,10 @@ class data_merge(object):
         # train_csv = os.path.join(self.dic["PATCHNET"].root_dir, 'train', 'train_list11.csv')
         # val_csv = os.path.join(self.dic["PATCHNET"].root_dir, 'val', 'val_list11.csv')
         # test_csv = os.path.join(self.dic["PATCHNET"].root_dir, 'test', 'test_list.csv')
-        train_csv = os.path.join('./data/', 'train_list11.csv')
-        val_csv = os.path.join('./data/', 'val_list11.csv')
-        test_csv = os.path.join('./data/', 'test_list.csv')
+        train_csv = os.path.join('/app/data_dir/train', 'train_list.csv')
+        val_csv = os.path.join('/app/data_dir/val', 'val_list.csv')
+        # test_csv = os.path.join('/app/data_dir/test', 'test_list.csv')
+        test_csv = os.path.join('./data', 'test_list.csv')
         if type == 'train':
             # if data_name in self.datasets:
             data_set = Spoofing_TrainVal(train_csv, transform=transform, img_size=img_size, UUID=UUID)

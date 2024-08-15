@@ -54,6 +54,7 @@ class ToTensor_test_video(object):
         sample['label'] = torch.from_numpy(spoofing_label_np.astype(np.long)).long()
         return sample
 
+
 def transformer_test_video():
     return transforms.Compose([Normaliztion_valtest_video(), ToTensor_test_video()])
 

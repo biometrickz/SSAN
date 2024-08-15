@@ -28,7 +28,7 @@ def main(args):
 
     # define train loader
     # train_set = data_bank.get_datasets(type='train', img_size=args.img_size, map_size=args.map_size, transform=transformer_train_pure(), debug_subset_size=args.debug_subset_size)
-    train_set = data_bank.get_datasets(type='train', img_size=args.img_size, transform=transformer_train_pure(), debug_subset_size=args.debug_subset_size)
+    train_set = data_bank.get_datasets(type='train', img_size=args.img_size, transform=transformer_train(), debug_subset_size=args.debug_subset_size)
 
     num_workers = 16
     train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True, num_workers=num_workers)

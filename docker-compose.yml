@@ -5,11 +5,14 @@ services:
       context: .
       dockerfile: ./Dockerfile
     volumes:
-      - /mnt/8TB/ml_projects_yeldar/patchnet/M1_3_4:/app/data_dir/M1_3_4:rw
-      - /mnt/8TB/ml_projects_yeldar/patchnet/M1_3_4_val:/app/data_dir/M1_3_4_val:rw
-      #  - ./src:/workspace:rw
+      # - /mnt/8TB/ml_projects_yeldar/patchnet/M1_3_4_val:/app/data_dir/M1_3_4_val:rw
+      - .:/app:rw
       #  - ./test_faces:/workspace/test_faces:rw
       #  - /home/user/ml_projects/Yeldar/data/SiWMv2_processed/live:/workspace/SiWMv2_processed/live:rw
+      - /mnt/8TB/ml_projects_yeldar/patchnet/train:/app/data_dir/train:rw
+      - /mnt/8TB/ml_projects_yeldar/patchnet/val:/app/data_dir/val:rw
+      - /mnt/8TB/ml_projects_yeldar/patchnet/test:/app/data_dir/test:rw
+
     restart: on-failure
     deploy:
       resources:

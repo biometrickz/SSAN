@@ -8,16 +8,16 @@ def parse_args():
     parser.add_argument('--result_path', type=str, default='./results', help='root result directory')
     parser.add_argument('--result_name', type=str, default='Experiment', help='result directory')
     # training settings
-    parser.add_argument('--model_type', type=str, default="SSAN_M", help='model_type')
-    parser.add_argument('--batch_size', type=int, default=16, help='batch size') # authors have batch_size=16 
-    parser.add_argument('--img_size', type=int, default=256, help='img size')
+    parser.add_argument('--model_type', type=str, default="SSAN_R", help='model_type')
+    parser.add_argument('--batch_size', type=int, default=32, help='batch size') # authors have batch_size=16 
+    parser.add_argument('--img_size', type=int, default=112, help='img size')
     parser.add_argument('--map_size', type=int, default=32, help='depth map size')
     # parser.add_argument('--protocol', type=str, default="Custom", help='protocal')
     parser.add_argument('--device', type=str, default='0,1', help='device id, format is like 0,1,2')
     parser.add_argument('--base_lr', type=float, default=0.0001, help='base learning rate')
     parser.add_argument('--start_epoch', type=int, default=0, help='start epoch')
-    parser.add_argument('--num_epochs', type=int, default=100, help='total training epochs')
-    parser.add_argument('--print_freq', type=int, default=20, help='print frequency')
+    parser.add_argument('--num_epochs', type=int, default=1200, help='total training epochs')
+    parser.add_argument('--print_freq', type=int, default=200, help='print frequency')
     parser.add_argument('--step_size', type=int, default=500, help='how many epochs lr decays once')
     parser.add_argument('--gamma', type=float, default=0.5, help='gamma of optim.lr_scheduler.StepLR, decay of lr')
     parser.add_argument('--trans', type=str, default="o", help="different pre-process")
