@@ -4,6 +4,7 @@ import os
 from networks import get_model
 from datasets import data_merge, data_merge_R
 from optimizers import get_optimizer
+from networks import SSAN_R
 from torch.utils.data import Dataset, DataLoader
 from transformers import *
 from utils import *
@@ -37,15 +38,26 @@ def main(args):
     # define model
     model = get_model(args.model_type, max_iter).cuda()
     # def optimizer
+   
+    if args.pretrain:
+        checkpoint = torch.load(args.saved_model_path)
+        print(f"epoch={checkpoint['epoch']}")
+        print(f"keys: {checkpoint['state_dict']}")
+        last_epoch = checkpoint['epoch']
+        # loss = checkpoint['loss']
+        model.load_state_dict(checkpoint['state_dict'])
+        # optimizer.load_state_dict(checkpoint['optimizer'])
+
+
+    # def scheduler
+    # model = SSAN_R().cuda()
     optimizer = get_optimizer(
         args.optimizer, model, 
         lr=args.base_lr,
         momentum=args.momentum, 
         weight_decay=args.weight_decay)
-    # def scheduler
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.step_size, gamma=args.gamma)
     model = nn.DataParallel(model).cuda()
-
 
     tb_root_path = os.path.join(args.result_path, args.result_name, "tb")
     check_folder(tb_root_path)
@@ -65,13 +77,23 @@ def main(args):
     # Initialize TensorBoard writer
     writer = SummaryWriter(tb_root_path)
 
-    # metrics
+    # # metrics
     eva = {
         "best_epoch": -1,
         "best_HTER": 100,
         "best_auc": -100
     }
+
+    # eva = {
+    #     "best_epoch": last_epoch,
+    #     "best_HTER": 0.0159,
+    #     "best_auc": 0.9979
+    # }
+
     for epoch in range(args.start_epoch, args.num_epochs):
+
+    # for epoch in range(last_epoch+1, args.num_epochs):
+
         est = time.time()
 
         binary_loss_record = AvgrageMeter()

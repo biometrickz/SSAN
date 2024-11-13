@@ -2,6 +2,7 @@
 results/
 data/
 *.sh
+*.txt
 demo.py
 
 # system ignore

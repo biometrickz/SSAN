@@ -26,40 +26,33 @@ class data_merge(object):
 # train_list10 - M1+M3+M4 - added more live, mainly D3 on which there were bad results (added to train only)
 # train_list11 - same as train_list10 but with different path to be convenient for docker 
 # train_list12 = 10% train_list11 
+# train_list13 = M1+M3+M4+coid
+# train_list14 = train_list13 + M4_synhtez
+# train_list15 = train_list13 + 90%M4_synhtez, 10% added to val
 
 
     def get_single_dataset(self, type='train', img_size=256, transform=None, debug_subset_size=None, UUID=-1):
-        # train_csv = os.path.join(self.dic["PATCHNET"].root_dir, 'train', 'train_list11.csv')
-        # val_csv = os.path.join(self.dic["PATCHNET"].root_dir, 'val', 'val_list11.csv')
-        # test_csv = os.path.join(self.dic["PATCHNET"].root_dir, 'test', 'test_list.csv')
-        train_csv = os.path.join('/app/data_dir/train', 'train_list.csv')
-        val_csv = os.path.join('/app/data_dir/val', 'val_list.csv')
-        # test_csv = os.path.join('/app/data_dir/test', 'test_list.csv')
-        test_csv = os.path.join('./data', 'test_list.csv')
+        train_csv = os.path.join('./data', 'train_list15.csv')
+        val_csv = os.path.join('./data', 'val_list15.csv')
+        test_csv = os.path.join('./data', 'test_list13.csv')
+        # test_csv = os.path.join('./data', 'test_list_mask.csv')
+
         if type == 'train':
-            # if data_name in self.datasets:
+
             data_set = Spoofing_TrainVal(train_csv, transform=transform, img_size=img_size, UUID=UUID)
-            # else:
-            #     print("NO DATASET Found")
-            #     exit()    
+
             if debug_subset_size is not None:
                 data_set = torch.utils.data.Subset(data_set, range(0, debug_subset_size))
         elif type == 'val':
-            # if data_name in self.datasets:
-            #     print("HEY", data_name)
+
             data_set = Spoofing_TrainVal(val_csv, transform=transform, img_size=img_size, UUID=UUID)
-            # else:
-            #     print("NO DATASET Found")
-            #     exit() 
+
             if debug_subset_size is not None:
                 data_set = torch.utils.data.Subset(data_set, range(0, debug_subset_size))
         elif type == 'test':
-            # if data_name in self.datasets:
-            #     print("HEY", data_name)
+
             data_set = Spoofing_Test(test_csv, transform=transform, img_size=img_size, UUID=UUID)
-            # else:
-            #     print("NO DATASET Found")
-            #     exit() 
+
             if debug_subset_size is not None:
                 data_set = torch.utils.data.Subset(data_set, range(0, debug_subset_size))
         print("Loading dataset, number: {}".format(len(data_set)))

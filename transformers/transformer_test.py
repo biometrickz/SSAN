@@ -35,6 +35,28 @@ class Normaliztion_valtest_video_ImageNet(object):
         sample['image_x'] = image_x
         return sample
 
+class RGB2BGR(object):
+    """
+    Convert an image from RGB to BGR format with a specified probability.
+    """
+    def __init__(self, apply_prob=0.2):
+        self.apply_prob = apply_prob  # Probability of applying the transform
+
+    def __call__(self, sample):
+        image_x = sample['image_x']
+        
+        # Randomly decide whether to apply the transform
+        if np.random.rand() < self.apply_prob:
+            # Ensure the image has 3 channels (RGB)
+            if image_x.ndim == 3 and image_x.shape[2] == 3:
+                image_x = image_x[..., ::-1]  # Swap the RGB to BGR
+            else:
+                raise ValueError(f"Expected image with 3 channels, got shape {image_x.shape}")
+        
+        sample['image_x'] = image_x
+        return sample
+    
+
 class ToTensor_test_video(object):
     """
         Convert ndarrays in sample to Tensors.
@@ -55,7 +77,9 @@ class ToTensor_test_video(object):
         return sample
 
 
-def transformer_test_video():
+def transformer_test_video(bgr=False):
+    if bgr ==True:
+        return transforms.Compose([RGB2BGR(), Normaliztion_valtest_video(), ToTensor_test_video()]) 
     return transforms.Compose([Normaliztion_valtest_video(), ToTensor_test_video()])
 
 # use ImageNet mean and var for normalization

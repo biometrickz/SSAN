@@ -42,6 +42,45 @@ def performances_val(map_score_val_filename):
     return val_ACC, fpr[right_index], FRR[right_index], HTER[right_index], auc_test, val_err
 
 
+
+def performance_double_val(original_scores, bgr_scores, labels):
+    val_scores = []
+    val_labels = []
+    data = []
+    count = 0
+
+    for orig_score, bgr_score in zip(original_scores, bgr_scores):
+        count += 1
+        # Take the maximum score between the original and BGR scores for each sample
+        final_score = max(orig_score, bgr_score)
+        label = labels[int(count-1)]  # Both should have the same label
+        
+        val_scores.append(final_score)
+        val_labels.append(label)
+        data.append({'map_score': final_score, 'label': label})
+    
+    # Calculate ROC curve and AUC
+    fpr, tpr, threshold = roc_curve(val_labels, val_scores, pos_label=1)
+    auc_test = auc(fpr, tpr)
+    
+    # Calculate error rate and optimal threshold
+    val_err, val_threshold, right_index = get_err_threhold(fpr, tpr, threshold)
+    
+    # Type I and Type II errors
+    type1 = len([s for s in data if s['map_score'] < val_threshold and s['label'] == 1])
+    type2 = len([s for s in data if s['map_score'] > val_threshold and s['label'] == 0])
+    
+    # Accuracy
+    val_ACC = 1 - (type1 + type2) / count
+    
+    # False Rejection Rate (FRR)
+    FRR = 1 - tpr
+    
+    # Half Total Error Rate (HTER)
+    HTER = (fpr + FRR) / 2.0
+    
+    return val_ACC, fpr[right_index], FRR[right_index], HTER[right_index], auc_test, val_err
+
 def performances_tpr_fpr(map_score_val_filename):
     with open(map_score_val_filename, 'r') as file:
         lines = file.readlines()
