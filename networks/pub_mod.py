@@ -48,14 +48,6 @@ class ResnetAdaINBlock(nn.Module):
         self.conv2 = nn.Conv2d(dim, dim, kernel_size=3, stride=1, padding=1, bias=False)
         self.norm2 = adaIN()
 
-    # def forward(self, x, gamma, beta):
-    #     out = self.conv1(x)
-    #     out = self.norm1(x, gamma, beta)
-    #     out = self.relu1(x)
-    #     out = self.conv2(x)
-    #     out = self.norm2(x, gamma, beta)
-    #     return x+out
-
     def forward(self, x, gamma, beta):
         out = self.conv1(x)
         out = self.norm1(out, gamma, beta)

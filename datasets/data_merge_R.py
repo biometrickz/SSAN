@@ -58,7 +58,7 @@ class data_merge(object):
         print("Loading dataset, number: {}".format(len(data_set)))
         return data_set
 
-    def get_datasets(self, type='train', img_size=256, map_size=32, transform=None, debug_subset_size=None):
+    def get_datasets(self, type='train', img_size=256, transform=None, debug_subset_size=None):
         
         data_set_sum = None
         if type == 'train':
