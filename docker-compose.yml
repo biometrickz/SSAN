@@ -6,9 +6,10 @@ services:
       dockerfile: ./Dockerfile
     volumes:
       - .:/app:rw
-      - /mnt/8TB/ml_projects_yeldar/MaskSynthez/M4_clean_cropped:/app/data_dir/M4_clean_cropped:rw
-      - /mnt/8TB/ml_projects_yeldar/cropped_youtube_insta_tiktok:/app/data_dir/mask_test:rw
-      - /mnt/8TB/ml_projects_yeldar/patchnet:/app/data_dir:rw
+      # - /mnt/8TB/ml_projects_yeldar/MaskSynthez/M4_clean_cropped:/app/data_dir/M4_clean_cropped:rw
+      # - /mnt/8TB/ml_projects_yeldar/cropped_youtube_insta_tiktok:/app/data_dir/mask_test:rw
+      # - /mnt/8TB/ml_projects_yeldar/patchnet:/app/data_dir:rw
+      - /mnt/22TB/Nurmukhammed/SILICON_MASKS_DATASETS/CROPPED_FACES_MASK_DATASET_RETINAFACE:/app/data_dir:rw
 
     restart: on-failure
     deploy:

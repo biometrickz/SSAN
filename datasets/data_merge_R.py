@@ -29,12 +29,13 @@ class data_merge(object):
 # train_list13 = M1+M3+M4+coid
 # train_list14 = train_list13 + M4_synhtez
 # train_list15 = train_list13 + 90%M4_synhtez, 10% added to val
+# train_list16 = newly generated mask dataset
 
 
     def get_single_dataset(self, type='train', img_size=256, transform=None, debug_subset_size=None, UUID=-1):
-        train_csv = os.path.join('./data', 'train_list15.csv')
-        val_csv = os.path.join('./data', 'val_list15.csv')
-        test_csv = os.path.join('./data', 'test_list13.csv')
+        train_csv = os.path.join('./data', 'train_list16.csv')
+        val_csv = os.path.join('./data', 'val_list16.csv')
+        test_csv = os.path.join('./data', 'test_list16.csv')
         # test_csv = os.path.join('./data', 'test_list_mask.csv')
 
         if type == 'train':
