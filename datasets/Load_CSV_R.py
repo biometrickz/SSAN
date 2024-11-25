@@ -50,7 +50,9 @@ class Spoofing_Test(Dataset):
     
     def __init__(self, info_list, transform=None, img_size=256, UUID=-1):
         self.labels = pd.read_csv(info_list, delimiter=",", header=None).drop([0], axis=0)
-        self.labels[0] = [x.replace("/mnt/22TB/Nurmukhammed/SILICON_MASKS_DATASETS/CROPPED_FACES_MASK_DATASET_RETINAFACE", "/app/data_dir") for x in self.labels[0]]
+        self.labels[0] = [x.replace("/22tb", "/mnt/22TB") for x in self.labels[0]]
+
+        # self.labels[0] = [x.replace("/mnt/22tb/Nurmukhammed/SILICON_MASKS_DATASETS/CROPPED_FACES_MASK_DATASET_RETINAFACE", "/app/data_dir") for x in self.labels[0]]
         self.transform = transform
         self.img_size = img_size
         self.UUID = UUID
